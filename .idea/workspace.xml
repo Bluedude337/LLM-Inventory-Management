@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/LLM Inventory Management.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/check_users.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/database.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/auth.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/pages.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/po.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/products.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/suppliers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/auth_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/export_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/pdf_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/po_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/product_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/supplier_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/static/landing.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/static/logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/static/suppliers.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/static/suppliers_form.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/static/suppliers_list.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/templates/suppliers_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/templates/suppliers_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/assets/logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/assets/po_template.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/css/main.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/dashboard.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/inventory/inventory.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/inventory/inventory.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_create.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_create.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_list.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_view.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_view.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/suppliers/suppliers.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/suppliers/suppliers.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/utils.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="35w6QesfFi10JtqbVqUc0308O5Y" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/gusan/PycharmProjects/LLM Inventory Management/frontend/assets"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\gusan\PycharmProjects\LLM Inventory Management\frontend\assets" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\gusan\PycharmProjects\LLM Inventory Management\frontend" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-f69e5c277ee4-cbfc7b97e6b2-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.27397.106" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="" />
+      <created>1764008771589</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1764008771589</updated>
+    </task>
+    <servers />
+  </component>
+</project>

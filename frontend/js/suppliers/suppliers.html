@@ -1,0 +1,84 @@
+<h1 style="font-weight:300;">Suppliers</h1>
+
+<!-- Search + Actions -->
+<div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
+    <input id="supSearch" placeholder="Search by CNPJ, name, city..."
+           style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#e2e8f0;"
+           oninput="supApplyFilters()">
+    <button class="btn" onclick="openRegisterSupplier()">Register Supplier</button>
+    <button class="btn ghost" onclick="printSuppliers()">Print</button>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th onclick="supSort('cnpj')">CNPJ</th>
+        <th onclick="supSort('name')">Name</th>
+        <th onclick="supSort('address')">Address</th>
+        <th onclick="supSort('neighborhood')">Neighborhood</th>
+        <th onclick="supSort('city')">City</th>
+        <th onclick="supSort('state')">State</th>
+        <th onclick="supSort('cep')">CEP</th>
+        <th onclick="supSort('seller')">Seller</th>
+        <th onclick="supSort('cellphone')">Cellphone</th>
+      </tr>
+      <tr>
+        <th><input id="f_cnpj" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_name" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_address" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_neigh" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_city" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_state" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_cep" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_seller" class="flt" oninput="supApplyFilters()"></th>
+        <th><input id="f_cell" class="flt" oninput="supApplyFilters()"></th>
+      </tr>
+    </thead>
+
+    <tbody id="supBody">
+      <tr><td colspan="9" style="padding:20px; text-align:center;">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<div style="margin-top:12px; display:flex; justify-content:flex-end; gap:10px;">
+  <button class="btn ghost" onclick="supPrevPage()">Prev</button>
+  <button class="btn ghost" onclick="supNextPage()">Next</button>
+</div>
+
+<!-- Register Supplier Modal -->
+<div id="supModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:20;">
+  <div class="modal-box" style="width:720px; max-width:95%;">
+    <h2 style="margin-top:0; font-weight:300;">Register Supplier</h2>
+
+    <div style="display:flex; gap:12px;">
+      <!-- LEFT COLUMN -->
+      <div style="flex:1;">
+        <input id="s_cnpj" class="modal-input" placeholder="CNPJ">
+        <input id="s_name" class="modal-input" placeholder="Name">
+        <input id="s_address" class="modal-input" placeholder="Address">
+        <input id="s_neighborhood" class="modal-input" placeholder="Neighborhood">
+        <input id="s_city" class="modal-input" placeholder="City">
+        <input id="s_pix" class="modal-input" placeholder="PIX">
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="flex:1;">
+        <input id="s_state" class="modal-input" placeholder="State">
+        <input id="s_cep" class="modal-input" placeholder="CEP">
+        <input id="s_seller" class="modal-input" placeholder="Seller / Representative">
+        <input id="s_cell" class="modal-input" placeholder="Cellphone">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:12px;">
+      <button class="btn" onclick="registerSupplier()">Save</button>
+      <button class="btn ghost" onclick="closeRegisterSupplier()">Close</button>
+    </div>
+
+    <div id="supRegMsg" style="margin-top:10px; font-weight:bold;"></div>
+  </div>
+</div>

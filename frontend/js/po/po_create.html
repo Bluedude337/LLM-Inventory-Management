@@ -1,0 +1,58 @@
+<!-- Supplier & Buyer Selection -->
+<div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-top:0; font-weight:300;">Supplier & Buyer Information</h3>
+
+    <div style="display:flex; gap:20px;">
+
+        <!-- SUPPLIER COLUMN -->
+        <div style="flex:1;">
+            <h4 style="margin:5px 0 10px 0; font-weight:300;">Supplier</h4>
+
+            <button class="btn ghost" onclick="openSupplierPicker()">Select Supplier</button>
+
+            <div id="selectedSupplier" style="margin-top:15px; color:#cbd5e1;">
+                No supplier selected.
+            </div>
+        </div>
+
+        <!-- BUYER COLUMN -->
+        <div style="flex:1;">
+            <h4 style="margin:5px 0 10px 0; font-weight:300;">Buyer</h4>
+
+            <button class="btn ghost" onclick="openBuyerPicker()">Select Buyer</button>
+
+            <div id="selectedBuyer" style="margin-top:15px; color:#cbd5e1;">
+                No buyer selected.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Item Entry -->
+<div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-top:0;font-weight:300;">Add Items</h3>
+
+    <!-- Dynamic PO Items Container -->
+    <div id="poItems"></div>
+
+    <!-- Add item row -->
+    <button class="btn" onclick="addPOItemRow()" style="margin-top:10px;">
+        + Add Item
+    </button>
+</div>
+
+<!-- Summary + Save -->
+<div class="card">
+    <h3 style="margin-top:0;font-weight:300;">Summary</h3>
+
+    <div id="poTotal" style="font-size:18px; font-weight:bold;">
+        Total: R$ 0,00
+    </div>
+
+    <button class="btn" style="margin-top:15px;" onclick="savePO()">
+        Save Purchase Order
+    </button>
+</div>
+
+

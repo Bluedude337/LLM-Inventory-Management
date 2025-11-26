@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Golden Dolphin - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <img src="assets/logo.png" alt="Logo" style="width:120px; margin:0 auto 25px auto; display:block; border-radius:8px; opacity:0.9;">
+
+    <button class="nav-btn" id="navInventory">📦 Inventory</button>
+    <button class="nav-btn" id="navSuppliers">🏭 Suppliers</button>
+    <button class="nav-btn" id="navPOs">📄 Purchase Orders</button>
+
+    <button class="nav-btn">⬆ Entries</button>
+    <button class="nav-btn">⬇ Exits</button>
+
+    <button class="nav-btn" onclick="window.location='/'" style="margin-top:auto; background:#ef4444;">
+        🚪 Logout
+    </button>
+</div>
+
+<!-- Main Content Area -->
+<div class="content" id="contentArea">
+    <h1 style="font-weight:300;">Dashboard Overview</h1>
+    <div class="placeholder-box">
+        <h2>Welcome to Golden Dolphin</h2>
+        <p>Select an option from the sidebar to begin.</p>
+    </div>
+</div>
+
+<!-- ========================
+     JAVASCRIPT MODULE IMPORTS
+     ======================== -->
+
+<!-- Utils (global helpers) -->
+<script src="js/utils.js"></script>
+
+<!-- Main router -->
+<script src="js/main.js"></script>
+
+<!-- Inventory -->
+<script src="js/inventory/inventory.js"></script>
+
+<!-- Suppliers -->
+<script src="js/suppliers/suppliers.js"></script>
+
+<!-- Purchase Orders -->
+<script src="js/po/po_list.js"></script>
+<script src="js/po/po_create.js"></script>
+<script src="js/po/po_view.js"></script>
+
+</body>
+</html>

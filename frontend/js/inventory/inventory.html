@@ -1,0 +1,61 @@
+<h1 style="font-weight:300;">Inventory</h1>
+
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+    <input id="invSearch" placeholder="Search..."
+        style="flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#1e293b; color:#e2e8f0;"
+        oninput="invApplyFilters()">
+
+    <button class="btn" onclick="openRegisterItem()">Register Item</button>
+    <button class="btn ghost" onclick="printInventory()">Print</button>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th onclick="invSort('code')">Code</th>
+                <th onclick="invSort('category')">Category</th>
+                <th onclick="invSort('subcategory')">Subcategory</th>
+                <th onclick="invSort('description')">Description</th>
+                <th onclick="invSort('unit')">Unit</th>
+                <th onclick="invSort('stock')">Stock</th>
+            </tr>
+            <tr>
+                <th><input id="f_code" class="flt" oninput="invApplyFilters()"></th>
+                <th><input id="f_cat" class="flt" oninput="invApplyFilters()"></th>
+                <th><input id="f_sub" class="flt" oninput="invApplyFilters()"></th>
+                <th><input id="f_desc" class="flt" oninput="invApplyFilters()"></th>
+                <th><input id="f_unit" class="flt" oninput="invApplyFilters()"></th>
+                <th><input id="f_stock" class="flt" oninput="invApplyFilters()"></th>
+            </tr>
+        </thead>
+
+        <tbody id="invBody">
+            <tr><td colspan="6" style="padding:20px; text-align:center;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top:12px; display:flex; justify-content:flex-end; gap:10px;">
+    <button class="btn ghost" onclick="invPrevPage()">Prev</button>
+    <button class="btn ghost" onclick="invNextPage()">Next</button>
+</div>
+
+<!-- Register Modal -->
+<div id="regModal" style="display:none;">
+    <div class="modal-box">
+        <h2 style="margin-top:0; font-weight:300;">Register Item</h2>
+
+        <input id="r_code" placeholder="Code" class="modal-input">
+        <input id="r_cat" placeholder="Category" class="modal-input">
+        <input id="r_sub" placeholder="Subcategory" class="modal-input">
+        <input id="r_desc" placeholder="Description" class="modal-input">
+        <input id="r_unit" placeholder="Unit" class="modal-input">
+        <input id="r_stock" placeholder="Stock" class="modal-input">
+
+        <button class="btn" onclick="registerItem()">Save</button>
+        <button class="btn ghost" onclick="closeRegisterItem()">Close</button>
+
+        <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
+    </div>
+</div>

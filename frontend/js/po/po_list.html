@@ -1,0 +1,35 @@
+<h1 style="font-weight:300;">Purchase Orders</h1>
+
+<!-- Search + Create -->
+<div style="display:flex; gap:12px; margin-bottom:14px; align-items:center;">
+    <button class="btn" onclick="openCreatePO()">Create New PO</button>
+</div>
+
+<!-- PO Table -->
+<div class="card">
+    <table>
+        <thead>
+            <!-- Header labels -->
+            <tr>
+                <th>PO #</th>
+                <th>Supplier</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Open</th>
+            </tr>
+
+            <!-- Filter row -->
+            <tr>
+                <th><input id="fltPOCode" class="flt" placeholder="Filter..." oninput="applyPOFilters()"></th>
+                <th><input id="fltSupplier" class="flt" placeholder="Filter..." oninput="applyPOFilters()"></th>
+                <th><input id="fltDate" class="flt" placeholder="Filter..." oninput="applyPOFilters()"></th>
+                <th><input id="fltStatus" class="flt" placeholder="Filter..." oninput="applyPOFilters()"></th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody id="poListBody">
+            <tr><td colspan="5" style="padding:20px; text-align:center;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>

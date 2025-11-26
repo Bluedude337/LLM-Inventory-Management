@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Golden Dolphin - Login</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #1e293b;
+        font-family: Arial, sans-serif;
+        color: #e2e8f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        background: #0f172a;
+        padding: 40px;
+        border-radius: 12px;
+        width: 350px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        border: 1px solid #334155;
+    }
+
+    .logo {
+        width: 120px;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        margin-bottom: 25px;
+        color: #f8fafc;
+        font-weight: 300;
+    }
+
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        outline: none;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 16px;
+        background: #1e293b;
+        color: #f1f5f9;
+        border: 1px solid #475569;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #38bdf8;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        color: #0f172a;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.2s;
+        margin-bottom: 10px;
+    }
+
+    button:hover {
+        background: #0ea5e9;
+    }
+
+    /* Registration modal */
+    .modal-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal {
+        background: #0f172a;
+        padding: 25px;
+        border-radius: 12px;
+        width: 320px;
+        border: 1px solid #334155;
+        text-align: center;
+    }
+
+    .close-btn {
+        background: #ef4444;
+        margin-top: 10px;
+    }
+    .close-btn:hover {
+        background: #dc2626;
+    }
+
+    .successMsg, .errorMsg {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .successMsg {
+        color: #4ade80;
+    }
+
+    .errorMsg {
+        color: #f87171;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <img class="logo" src="/static/logo.png" alt="Golden Dolphin Logo" />
+
+    <h1>Welcome</h1>
+
+    <input type="text" id="loginUsername" placeholder="Enter username" />
+    <button onclick="continueLogin()">Continue</button>
+
+    <button onclick="showRegisterModal()" style="background:#64748b;">Register Account</button>
+</div>
+
+<!-- Registration Modal -->
+<div class="modal-bg" id="registerModal">
+    <div class="modal">
+        <h2>Create Account</h2>
+
+        <input type="text" id="regUsername" placeholder="New username" />
+        <input type="password" id="regPassword" placeholder="New password" />
+
+        <button onclick="registerUser()">Register</button>
+        <button class="close-btn" onclick="closeRegisterModal()">Close</button>
+
+        <div id="regMessage"></div>
+    </div>
+</div>
+
+<script>
+function showRegisterModal() {
+    document.getElementById("registerModal").style.display = "flex";
+}
+
+function closeRegisterModal() {
+    document.getElementById("registerModal").style.display = "none";
+    document.getElementById("regMessage").innerHTML = "";
+}
+
+function continueLogin() {
+    const username = document.getElementById("loginUsername").value;
+
+    if (!username) {
+        alert("Please enter your username.");
+        return;
+    }
+
+    // Redirect to dashboard
+    window.location = "/dashboard";
+}
+
+async function registerUser() {
+    const username = document.getElementById("regUsername").value;
+    const password = document.getElementById("regPassword").value;
+    const msgDiv = document.getElementById("regMessage");
+
+    if (!username || !password) {
+        msgDiv.innerHTML = "<p class='errorMsg'>Please fill in both fields.</p>";
+        return;
+    }
+
+    const res = await fetch("/auth/signup", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+    });
+
+    if (res.status === 409) {
+        msgDiv.innerHTML = "<p class='errorMsg'>Username already exists.</p>";
+        return;
+    }
+
+    if (!res.ok) {
+        msgDiv.innerHTML = "<p class='errorMsg'>Failed to register.</p>";
+        return;
+    }
+
+    msgDiv.innerHTML = "<p class='successMsg'>User registered successfully!</p>";
+}
+
+
+
+
+
+</script>
+
+</body>
+</html>
+
+
