@@ -4,55 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/LLM Inventory Management.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/check_users.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/core/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/core/database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routers/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routers/pages.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routers/po.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routers/products.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routers/suppliers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/auth_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/export_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/pdf_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/po_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/product_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/services/supplier_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/static/landing.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/static/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/static/suppliers.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/static/suppliers_form.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/static/suppliers_list.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/templates/suppliers_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/templates/suppliers_list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/assets/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/assets/po_template.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/css/main.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/inventory/inventory.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/inventory/inventory.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_create.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_create.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_list.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_view.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/po/po_view.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/suppliers/suppliers.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/suppliers/suppliers.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/js/utils.js" afterDir="false" />
+    <list default="true" id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="26/11/2025 20:40">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routers/po.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routers/po.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +35,8 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/gusan/PycharmProjects/LLM Inventory Management/frontend/assets"
+    "last_opened_file_path": "C:/Users/gusan/PycharmProjects/LLM Inventory Management/frontend/assets",
+    "settings.editor.selected.configurable": "vcs.Git"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -107,6 +62,19 @@
       <option name="presentableId" value="Default" />
       <updated>1764008771589</updated>
     </task>
+    <task id="LOCAL-00001" summary="26/11/2025 20:40">
+      <option name="closed" value="true" />
+      <created>1764200471448</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1764200471448</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="26/11/2025 20:40" />
+    <option name="LAST_COMMIT_MESSAGE" value="26/11/2025 20:40" />
   </component>
 </project>

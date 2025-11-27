@@ -233,8 +233,8 @@ def download_po_pdf(po_number: int):
     # ------ Top fields (PIX, date, buyer, seller, phone) ------
     pix_x = 65; pix_y = PAGE_HEIGHT - 162
     date_x = 190; date_y = PAGE_HEIGHT - 162
-    seller_name_x = 380; seller_name_y = PAGE_HEIGHT - 162
-    seller_phone_x = 460; seller_phone_y = PAGE_HEIGHT - 162
+    seller_name_x = 375; seller_name_y = PAGE_HEIGHT - 162
+    seller_phone_x = 455; seller_phone_y = PAGE_HEIGHT - 162
 
     # ------ Supplier + Buyer block center positions ------
     supplier_center_x = 170
@@ -325,14 +325,6 @@ def download_po_pdf(po_number: int):
     table_y_start = PAGE_HEIGHT - 300
     row_height = 18
     max_rows_per_page = 18
-
-    c.setFont("Helvetica-Bold", 9)
-    c.drawString(table_xs["code"], table_y_start, "Code")
-    c.drawString(table_xs["desc"], table_y_start, "Description")
-    c.drawString(table_xs["unit"], table_y_start, "Unit")
-    c.drawString(table_xs["qty"], table_y_start, "Qty")
-    c.drawString(table_xs["unit_price"], table_y_start, "Unit Price")
-    c.drawString(table_xs["total"], table_y_start, "Total")
 
     c.setFont("Helvetica", 9)
     y = table_y_start - row_height
