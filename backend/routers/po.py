@@ -315,14 +315,14 @@ def download_po_pdf(po_number: int):
     # ITEMS TABLE (unchanged)
     # ============================================================
     table_xs = {
-        "code": 40,
-        "desc": 110,
-        "unit": 350,
-        "qty": 400,
-        "unit_price": 450,
-        "total": 520
+        "code": 58,
+        "desc": 105,
+        "unit": 312,
+        "qty": 348,
+        "unit_price": 400,
+        "total": 480
     }
-    table_y_start = PAGE_HEIGHT - 300
+    table_y_start = PAGE_HEIGHT - 240
     row_height = 18
     max_rows_per_page = 18
 
