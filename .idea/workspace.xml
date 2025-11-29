@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="26/11/2025 20:40&#10;Initial project commit" />
+    <list default="true" id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="26/11/2025 20:40&#10;Initial project commit">
+      <change afterPath="$PROJECT_DIR$/backend/routers/entries.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/entries/entries.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/js/entries/entries.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/text.text" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/core/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/data/inventory.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routers/po.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routers/po.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/po_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/po_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/po/po_view.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/po/po_view.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/po/po_view.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/po/po_view.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,6 +28,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Bluedude337&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Bluedude337/LLM-Inventory-Management.git&quot;,
+    &quot;accountId&quot;: &quot;4dbcb4b4-a02c-40a0-9915-aa8828afd773&quot;
+  }
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -47,7 +74,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-f69e5c277ee4-cbfc7b97e6b2-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.27397.106" />
+        <option value="bundled-python-sdk-7bb8055f9097-cbfc7b97e6b2-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.28238.29" />
       </set>
     </attachedChunks>
   </component>
@@ -67,11 +94,20 @@
       <option name="project" value="LOCAL" />
       <updated>1764200471448</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="26/11/2025 20:40&#10;Initial project commit">
+      <option name="closed" value="true" />
+      <created>1764279086239</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1764279086239</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="26/11/2025 20:40" />
-    <option name="LAST_COMMIT_MESSAGE" value="26/11/2025 20:40" />
+    <MESSAGE value="26/11/2025 20:40&#10;Initial project commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="26/11/2025 20:40&#10;Initial project commit" />
   </component>
 </project>

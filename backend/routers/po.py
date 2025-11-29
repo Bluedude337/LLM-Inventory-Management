@@ -10,7 +10,7 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from PIL import Image
-
+from backend.services.po_service import receive_po
 
 router = APIRouter()
 
@@ -394,5 +394,19 @@ def download_po_pdf(po_number: int):
     )
 
 
-
+@router.put("/{po_number}/receive")
+def receive_purchase_order(po_number: int):
+    """
+    Change PO status from APPROVED -> RECEIVED,
+    update inventory, record received tables.
+    """
+    try:
+        result = receive_po(po_number)
+        return {
+            "success": True,
+            "message": "PO received successfully.",
+            "data": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 

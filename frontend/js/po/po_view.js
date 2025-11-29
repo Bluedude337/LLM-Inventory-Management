@@ -31,7 +31,7 @@ async function loadPOView(po_number) {
         container.innerHTML = buildPOViewHTML(header, items);
 
         // After rendering, update button states based on PO status
-        applyPOStatusControls(header.status);
+        applyPOStatusControls(header.status, po_number);
 
     } catch (err) {
         console.error("PO view error:", err);
@@ -140,6 +140,9 @@ function buildPOViewHTML(header, items) {
 
             </div>
         </div>
+
+        <!-- Receive Button Area -->
+        <div id="poReceiveArea" style="margin-top:20px; text-align:right;"></div>
     `;
 }
 
@@ -147,65 +150,6 @@ function buildPOViewHTML(header, items) {
 /* =======================
    Actions: Approve / Cancel
    ======================= */
-
-async function changePOStatus(po_number, newStatus) {
-    const ok = confirm(`Change PO #${po_number} status to ${newStatus}?`);
-    if (!ok) return;
-
-    try {
-        const res = await fetch(`/api/po/${po_number}/status/`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ status: newStatus })
-        });
-
-        if (!res.ok) {
-            const err = await res.json();
-            alert("Failed to update status: " + (err.detail || res.status));
-            return;
-        }
-
-        alert("Status updated");
-        loadPOs();
-
-    } catch (err) {
-        console.error("Status update error:", err);
-        alert("Failed to update status.");
-    }
-}
-
-/* =======================
-   Navigation
-   ======================= */
-
-function backToPOList() {
-    loadPOs();
-}
-
-/* =======================
-   PDF Download
-   ======================= */
-
-function downloadPOPdf(po_number) {
-    const url = `/api/po/${po_number}/pdf/`;
-    window.open(url, "_blank");
-}
-
-/* =======================
-   Utils Fallback
-   ======================= */
-
-if (typeof escapeHtml !== "function") {
-    function escapeHtml(s) {
-        if (s == null) return "";
-        return String(s)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll("\"", "&quot;")
-            .replaceAll("'", "&#39;");
-    }
-}
 
 async function changePOStatus(po_number, newStatus) {
     if (!confirm(`Are you sure you want to mark this PO as ${newStatus}?`)) return;
@@ -225,20 +169,98 @@ async function changePOStatus(po_number, newStatus) {
     const data = await res.json();
     document.getElementById("poStatus").textContent = data.new_status;
 
-    // Disable buttons after change
-    if (newStatus !== "OPEN") {
-        document.getElementById("approveBtn").disabled = true;
-    }
-
     alert("Status updated successfully!");
+    loadPOView(po_number);
 }
 
-function applyPOStatusControls(status) {
-    const approveBtn = document.getElementById("approveBtn");
-    const cancelBtn = document.getElementById("cancelBtn"); // add ID to cancel button
 
+/* =======================
+   NEW: Receive PO
+   ======================= */
+
+async function receivePO(po_number) {
+    if (!confirm(`Confirm receiving PO #${po_number}? This will update inventory.`))
+        return;
+
+    try {
+        const res = await fetch(`/api/po/${po_number}/receive`, {
+            method: "PUT"
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            alert("Error: " + (err.detail || "Could not receive PO"));
+            return;
+        }
+
+        alert("PO received successfully!");
+        openPO(po_number);
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to receive PO");
+    }
+}
+
+
+/* =======================
+   Status Control Logic
+   ======================= */
+
+function applyPOStatusControls(status, po_number) {
+    const approveBtn = document.getElementById("approveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const receiveArea = document.getElementById("poReceiveArea");
+
+    // Disable approve/cancel when not OPEN
     if (status !== "OPEN") {
         if (approveBtn) approveBtn.disabled = true;
         if (cancelBtn) cancelBtn.disabled = true;
+    }
+
+    // Clear receive area
+    receiveArea.innerHTML = "";
+
+    // Only show "Receive Order" button when APPROVED
+    if (status === "APPROVED") {
+        receiveArea.innerHTML = `
+            <button class="btn" onclick="receivePO(${po_number})">
+                Receive Order
+            </button>
+        `;
+    }
+}
+
+
+/* =======================
+   Navigation
+   ======================= */
+
+function backToPOList() {
+    loadPOs();
+}
+
+/* =======================
+   PDF Download
+   ======================= */
+
+function downloadPOPdf(po_number) {
+    const url = `/api/po/${po_number}/pdf/`;
+    window.open(url, "_blank");
+}
+
+/* =======================
+   Utility Fallback
+   ======================= */
+
+if (typeof escapeHtml !== "function") {
+    function escapeHtml(s) {
+        if (s == null) return "";
+        return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#39;");
     }
 }

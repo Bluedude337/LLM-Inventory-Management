@@ -3,20 +3,12 @@
    ============================================ */
 
 /*
-   This file acts as the top-level controller for the dashboard.
-   It switches screens by calling the correct module loaders:
-     - loadInventory()
-     - loadSuppliers()
-     - loadPOs()
-
-   All these functions are provided by their respective modules.
+   Controls all navigation between screens:
+     - Inventory
+     - Suppliers
+     - Purchase Orders
+     - Entries
 */
-
-
-/* =======================
-   Safe loader wrapper
-   (prevents errors if a module has not loaded yet)
-   ======================= */
 
 function safeCall(fnName, ...args) {
     if (typeof window[fnName] === "function") {
@@ -27,12 +19,12 @@ function safeCall(fnName, ...args) {
     }
 }
 
-
 /* =======================
    Sidebar Navigation
    ======================= */
 
 function setupNavigation() {
+
     // Inventory
     const invBtn = document.getElementById("navInventory");
     if (invBtn) {
@@ -50,21 +42,33 @@ function setupNavigation() {
     if (poBtn) {
         poBtn.addEventListener("click", () => safeCall("loadPOs"));
     }
+
+    // Entries  ← **FIXED NEW ENTRY**
+    const entBtn = document.getElementById("navEntries");
+    if (entBtn) {
+        entBtn.addEventListener("click", () => safeCall("loadEntriesPage"));
+    }
+
+    // Exits (placeholder for future)
+    const exitBtn = document.getElementById("navExits");
+    if (exitBtn) {
+        exitBtn.addEventListener("click", () => {
+            alert("Exits page not implemented yet.");
+        });
+    }
 }
 
-
 /* =======================
-   Initial Screen Loader
+   Load Default Screen
    ======================= */
 
 function loadDefaultScreen() {
-    // You can change this to "loadPOs" or "loadSuppliers" if you prefer.
+    // Change this if you want another default screen
     safeCall("loadInventory");
 }
 
-
 /* =======================
-   Initialize when dashboard loads
+   Startup
    ======================= */
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -12,7 +12,9 @@ def initialize_database():
     conn = get_connection()
     cur = conn.cursor()
 
-    # Create users table
+    # --------------------------
+    # USERS
+    # --------------------------
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +24,9 @@ def initialize_database():
         )
     """)
 
-    # Create products table
+    # --------------------------
+    # PRODUCTS
+    # --------------------------
     cur.execute("""
         CREATE TABLE IF NOT EXISTS products (
             code TEXT PRIMARY KEY,
@@ -34,67 +38,134 @@ def initialize_database():
         )
     """)
 
+    # --------------------------
+    # SUPPLIERS
+    # --------------------------
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS suppliers (
-      cnpj TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      address TEXT,
-      neighborhood TEXT,
-      city TEXT,
-      state TEXT,
-      cep TEXT,
-      seller TEXT,
-      cellphone TEXT,
-      pix TEXT
-    )
+        CREATE TABLE IF NOT EXISTS suppliers (
+            cnpj TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            address TEXT,
+            neighborhood TEXT,
+            city TEXT,
+            state TEXT,
+            cep TEXT,
+            seller TEXT,
+            cellphone TEXT,
+            pix TEXT
+        )
     """)
 
+    # --------------------------
+    # PURCHASE ORDERS
+    # --------------------------
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS purchase_orders (
-        po_number INTEGER PRIMARY KEY AUTOINCREMENT,
-        po_code TEXT UNIQUE,
+        CREATE TABLE IF NOT EXISTS purchase_orders (
+    po_number INTEGER PRIMARY KEY AUTOINCREMENT,
+    po_code TEXT UNIQUE,
 
-        -- Supplier
-        supplier_cnpj TEXT NOT NULL,
-        supplier_name TEXT,
-        supplier_address TEXT,
-        supplier_neighborhood TEXT,
-        supplier_city TEXT,
-        supplier_state TEXT,
-        supplier_cep TEXT,
-        supplier_pix TEXT,
-        supplier_contact TEXT,
+    -- Supplier
+    supplier_cnpj TEXT NOT NULL,
+    supplier_name TEXT,
+    supplier_address TEXT,
+    supplier_neighborhood TEXT,
+    supplier_city TEXT,
+    supplier_state TEXT,
+    supplier_cep TEXT,
+    supplier_pix TEXT,
+    supplier_contact TEXT,
 
-        -- Buyer
-        buyer_cnpj TEXT,
-        buyer_name TEXT,
-        buyer_address TEXT,
-        buyer_neighborhood TEXT,
-        buyer_city TEXT,
-        buyer_state TEXT,
-        buyer_cep TEXT,
-        buyer_pix TEXT,
-        buyer_contact TEXT,
+    -- Buyer
+    buyer_cnpj TEXT,
+    buyer_name TEXT,
+    buyer_address TEXT,
+    buyer_neighborhood TEXT,
+    buyer_city TEXT,
+    buyer_state TEXT,
+    buyer_cep TEXT,
+    buyer_pix TEXT,
+    buyer_contact TEXT,
 
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        status TEXT DEFAULT 'OPEN',
-        notes TEXT
-    )
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    received_at TEXT,                     -- ✅ ADD THIS LINE
+    status TEXT DEFAULT 'OPEN',
+    notes TEXT
+)
     """)
 
+    # --------------------------
+    # PO ITEMS
+    # --------------------------
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS po_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      po_number INTEGER NOT NULL,
-      item_code TEXT,
-      description TEXT,
-      unit TEXT,
-      qty INTEGER,
-      unit_price REAL,
-      line_total REAL,
-      FOREIGN KEY (po_number) REFERENCES purchase_orders(po_number)
-    )
+        CREATE TABLE IF NOT EXISTS po_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            po_number INTEGER NOT NULL,
+            item_code TEXT,
+            description TEXT,
+            unit TEXT,
+            qty INTEGER,
+            unit_price REAL,
+            line_total REAL,
+            FOREIGN KEY (po_number) REFERENCES purchase_orders(po_number)
+        )
     """)
+
+    # --------------------------
+    # PO RECEIVED (HEADER)
+    # --------------------------
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS po_received (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            po_number INTEGER NOT NULL,
+            received_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+            -- Supplier
+            supplier_cnpj TEXT,
+            supplier_name TEXT,
+
+            -- Buyer (MISSING BEFORE — NOW FIXED)
+            buyer_cnpj TEXT,
+            buyer_name TEXT,
+
+            total_value REAL,
+            notes TEXT
+        )
+    """)
+
+    # --------------------------
+    # PO RECEIVED ITEMS (DETAILS)
+    # --------------------------
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS po_received_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            po_received_id INTEGER NOT NULL,
+            product_code TEXT NOT NULL,
+            description TEXT,
+            unit TEXT,
+            qty REAL,
+            unit_price REAL,
+            line_total REAL,
+            FOREIGN KEY (po_received_id) REFERENCES po_received(id)
+        )
+    """)
+
+    # --------------------------
+    # ENTRIES HISTORY (LOG OF INVENTORY RECEIPTS)
+    # --------------------------
+    cur.execute("""
+            CREATE TABLE IF NOT EXISTS entries_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                po_number INTEGER,
+                supplier_cnpj TEXT,
+                product_code TEXT,
+                description TEXT,
+                unit TEXT,
+                qty REAL,
+                unit_cost REAL,
+                line_total REAL,
+                received_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
 
     conn.commit()

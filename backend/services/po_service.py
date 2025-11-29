@@ -1,120 +1,158 @@
-from fastapi import APIRouter, HTTPException, Response
-from fastapi.responses import StreamingResponse
 from backend.core.database import get_connection
-import io
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from datetime import datetime
+from fastapi import HTTPException
 
-router = APIRouter()
 
-# existing list/get/create endpoints should remain above (keep them).
-# Below we add status update & PDF generation.
-
-@router.post("/{po_number}/status/", tags=["Purchase Orders"])
-def update_po_status(po_number: int, payload: dict):
+def receive_po(po_number: int):
     """
-    payload: {"status": "APPROVED"} or {"status": "CANCELLED"}
+    Receives a Purchase Order:
+    - Validates status is APPROVED
+    - Creates po_received header record
+    - Copies items into po_received_items
+    - Inserts into entries_history
+    - Updates product stock
+    - Marks PO as RECEIVED
     """
-    new_status = payload.get("status")
-    if new_status not in ("OPEN", "APPROVED", "CANCELLED"):
-        raise HTTPException(status_code=400, detail="Invalid status")
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT po_number, status FROM purchase_orders WHERE po_number = ?", (po_number,))
-    row = cur.fetchone()
-    if not row:
+
+    try:
+        # ------------------------------------------
+        # 1. Load PO header
+        # ------------------------------------------
+        cur.execute("""
+            SELECT
+                po_number, po_code,
+                supplier_cnpj, supplier_name,
+                buyer_cnpj, buyer_name,
+                status, notes
+            FROM purchase_orders
+            WHERE po_number = ?
+        """, (po_number,))
+        po = cur.fetchone()
+
+        if not po:
+            raise HTTPException(status_code=404, detail="PO not found")
+
+        if po["status"] != "APPROVED":
+            raise HTTPException(status_code=400, detail="PO must be APPROVED before receiving")
+
+        # ------------------------------------------
+        # 2. Load PO items
+        # ------------------------------------------
+        cur.execute("""
+            SELECT item_code, description, unit, qty, unit_price, line_total
+            FROM po_items
+            WHERE po_number = ?
+        """, (po_number,))
+        items = cur.fetchall()
+
+        if not items:
+            raise HTTPException(status_code=400, detail="PO has no items to receive")
+
+        # ------------------------------------------
+        # 3. Calculate total
+        # ------------------------------------------
+        total_value = sum(float(i["line_total"] or 0) for i in items)
+
+        # ------------------------------------------
+        # 4. Create po_received header
+        # ------------------------------------------
+        cur.execute("""
+            INSERT INTO po_received (
+                po_number, supplier_cnpj, supplier_name,
+                buyer_cnpj, buyer_name,
+                total_value, notes
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            po["po_number"],
+            po["supplier_cnpj"], po["supplier_name"],
+            po["buyer_cnpj"], po["buyer_name"],
+            total_value,
+            po["notes"]
+        ))
+
+        po_received_id = cur.lastrowid
+
+        # ------------------------------------------
+        # 5. Insert each received item
+        # ------------------------------------------
+        for it in items:
+            cur.execute("""
+                INSERT INTO po_received_items (
+                    po_received_id,
+                    product_code, description, unit,
+                    qty, unit_price, line_total
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                po_received_id,
+                it["item_code"],
+                it["description"],
+                it["unit"],
+                it["qty"],
+                it["unit_price"],
+                it["line_total"]
+            ))
+
+        # ------------------------------------------
+        # 6. Insert into entries_history
+        # ------------------------------------------
+        for it in items:
+            cur.execute("""
+                INSERT INTO entries_history (
+                    po_number, supplier_cnpj,
+                    product_code, description, unit,
+                    qty, unit_cost, line_total
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                po_number,
+                po["supplier_cnpj"],
+                it["item_code"],
+                it["description"],
+                it["unit"],
+                it["qty"],
+                it["unit_price"],
+                it["line_total"]
+            ))
+
+        # ------------------------------------------
+        # 7. Update inventory table -> products.stock
+        # ------------------------------------------
+        for it in items:
+            cur.execute("""
+                UPDATE products
+                SET stock = stock + ?
+                WHERE code = ?
+            """, (
+                it["qty"],
+                it["item_code"]
+            ))
+
+        # ------------------------------------------
+        # 8. Mark PO as RECEIVED
+        # ------------------------------------------
+        cur.execute("""
+            UPDATE purchase_orders
+            SET status = 'RECEIVED', received_at = CURRENT_TIMESTAMP
+            WHERE po_number = ?
+        """, (po_number,))
+
+        # Commit everything
+        conn.commit()
+
+        return {
+            "status": "RECEIVED",
+            "po_number": po_number,
+            "po_received_id": po_received_id,
+            "total_received": total_value
+        }
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+
+    finally:
         conn.close()
-        raise HTTPException(status_code=404, detail="PO not found")
-
-    cur.execute("UPDATE purchase_orders SET status = ? WHERE po_number = ?", (new_status, po_number))
-    conn.commit()
-    conn.close()
-    return {"status": "ok", "po_number": po_number, "new_status": new_status}
-
-
-@router.get("/{po_number}/pdf/", tags=["Purchase Orders"])
-def get_po_pdf(po_number: int):
-    """
-    Generate a simple PDF for the PO and return it.
-    Uses a programmatic layout so you get a working PDF immediately.
-    We can later switch this to fill your uploaded PDF template.
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-
-    # header
-    cur.execute("SELECT * FROM purchase_orders WHERE po_number = ?", (po_number,))
-    header = cur.fetchone()
-    if not header:
-        conn.close()
-        raise HTTPException(status_code=404, detail="PO not found")
-
-    cur.execute("SELECT item_code, description, unit, qty, unit_price, line_total FROM po_items WHERE po_number = ?", (po_number,))
-    items = cur.fetchall()
-    conn.close()
-
-    # Create PDF in memory
-    buf = io.BytesIO()
-    p = canvas.Canvas(buf, pagesize=A4)
-    width, height = A4
-
-    # Simple header
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(40, height - 60, f"Purchase Order: {header['po_code'] or header['po_number']}")
-    p.setFont("Helvetica", 10)
-    p.drawString(40, height - 80, f"Date: {header['created_at']}")
-    p.drawString(40, height - 95, f"Supplier: {header.get('supplier_name','')}")
-    p.drawString(40, height - 110, f"CNPJ: {header.get('supplier_cnpj','')}")
-    p.drawString(40, height - 125, f"Address: {header.get('supplier_address','')} {header.get('supplier_neighborhood','')}")
-    p.drawString(40, height - 140, f"{header.get('supplier_city','')} - {header.get('supplier_state','')}  CEP: {header.get('supplier_cep','')}")
-    p.drawString(40, height - 155, f"PIX: {header.get('supplier_pix','')}  Contact: {header.get('supplier_contact','')}")
-
-    # Table header
-    y = height - 185
-    p.setFont("Helvetica-Bold", 10)
-    p.drawString(40, y, "Code")
-    p.drawString(110, y, "Description")
-    p.drawString(350, y, "Unit")
-    p.drawString(400, y, "Qty")
-    p.drawString(450, y, "Unit Price")
-    p.drawString(520, y, "Total")
-    p.setFont("Helvetica", 10)
-    y -= 16
-
-    total_sum = 0.0
-    for it in items:
-        # it: dict-like row; convert if necessary
-        code = it["item_code"]
-        desc = it["description"]
-        unit = it["unit"] or ""
-        qty = it["qty"] or 0
-        unit_price = it["unit_price"] or 0.0
-        line_total = it["line_total"] or (qty * unit_price)
-        total_sum += float(line_total)
-
-        p.drawString(40, y, str(code))
-        p.drawString(110, y, str(desc)[:40])
-        p.drawString(350, y, str(unit))
-        p.drawString(400, y, str(qty))
-        p.drawString(450, y, f"{unit_price:.2f}")
-        p.drawString(520, y, f"{line_total:.2f}")
-        y -= 14
-        if y < 80:
-            p.showPage()
-            y = height - 60
-
-    # Totals
-    y -= 10
-    p.setFont("Helvetica-Bold", 11)
-    p.drawString(400, y, "Total:")
-    p.drawString(520, y, f"{total_sum:.2f}")
-
-    # Footer
-    p.showPage()
-    p.save()
-    buf.seek(0)
-
-    filename = f"PO_{header['po_code'] or header['po_number']}.pdf"
-    return StreamingResponse(buf, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename={filename}"})
