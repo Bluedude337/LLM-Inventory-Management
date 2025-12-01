@@ -167,6 +167,59 @@ def initialize_database():
             )
         """)
 
+    # --------------------------
+    # EXITS (HEADER)
+    # --------------------------
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS exits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exit_code TEXT UNIQUE,
+            destination TEXT NOT NULL,
+            created_by INTEGER,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            notes TEXT
+        )
+    """)
+
+    # --------------------------
+    # EXIT ITEMS (DETAILS)
+    # --------------------------
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS exit_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exit_id INTEGER NOT NULL,
+            product_code TEXT NOT NULL,
+            description TEXT,
+            unit TEXT,
+            qty REAL NOT NULL,
+            unit_cost REAL,
+            line_total REAL,
+            FOREIGN KEY (exit_id) REFERENCES exits(id),
+            FOREIGN KEY (product_code) REFERENCES products(code)
+        )
+    """)
+
+    # --------------------------
+    # EXITS HISTORY (AUDIT LOG)
+    # --------------------------
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS exits_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exit_id INTEGER,
+            product_code TEXT,
+            qty REAL,
+            changed_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            changed_by INTEGER,
+            action TEXT
+        )
+    """)
 
     conn.commit()
     conn.close()
+
+if __name__ == "__main__":
+    # Running this file will initialize/migrate the DB schema.
+    # Useful for local development or CI steps.
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    initialize_database()
+    print(f"Database initialized at: {DB_PATH}")

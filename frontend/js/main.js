@@ -49,12 +49,10 @@ function setupNavigation() {
         entBtn.addEventListener("click", () => safeCall("loadEntriesPage"));
     }
 
-    // Exits (placeholder for future)
+    // Exits
     const exitBtn = document.getElementById("navExits");
     if (exitBtn) {
-        exitBtn.addEventListener("click", () => {
-            alert("Exits page not implemented yet.");
-        });
+        exitBtn.addEventListener("click", () => safeCall("loadExitsPage"));
     }
 }
 

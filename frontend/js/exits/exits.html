@@ -1,0 +1,83 @@
+<h1 style="font-weight:300;">Exits</h1>
+
+<!-- Top control bar -->
+<div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+    <button class="btn" onclick="openExitModal()">Create New Exit</button>
+</div>
+
+<!-- Exits table -->
+<div id="exitsContainer" class="card" style="padding:20px;">
+    Loading exits...
+</div>
+
+<!-- ========================================================= -->
+<!-- ===============    EXIT CREATION MODAL    =============== -->
+<!-- ========================================================= -->
+<div id="exitModal" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+">
+    <div class="modal-box" style="width:900px; max-width:95%;">
+
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="margin:0; font-weight:300;">Create New Exit</h2>
+            <button class="btn ghost" onclick="closeExitModal()">Close</button>
+        </div>
+
+        <!-- Destination and Created By -->
+        <div style="display:grid; grid-template-columns:1fr 200px; gap:12px; margin-bottom:12px;">
+            <input id="exitDestination" class="modal-input" placeholder="Destination (required)">
+            <input id="exitCreatedBy" class="modal-input" placeholder="User ID (optional)">
+        </div>
+
+        <!-- Notes -->
+        <textarea id="exitNotes" class="modal-input"
+                  placeholder="Notes (optional)"
+                  style="width:100%; height:80px; margin-bottom:12px;"></textarea>
+
+        <!-- Items Card -->
+        <div class="card" style="margin-bottom:15px;">
+    <h3 style="margin-top:0; font-weight:300;">Items</h3>
+
+    <!-- HEADER ROW -->
+    <div style="
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#cbd5e1;
+    padding:5px 0;
+    border-bottom:1px solid #334155;
+    text-align:center;
+">
+    <div style="width:90px; display:flex; justify-content:center;">Code</div>
+    <div style="flex:1; display:flex; justify-content:center;">Description</div>
+    <div style="width:70px; display:flex; justify-content:center;">Unit</div>
+    <div style="width:70px; display:flex; justify-content:center;">Stock</div>
+    <div style="width:70px; display:flex; justify-content:center;">Qty</div>
+    <div style="width:60px; display:flex; justify-content:center;"></div>
+</div>
+
+
+    <!-- DYNAMIC ITEMS -->
+    <div id="exitItemsContainer"></div>
+
+    <button class="btn" onclick="addExitItemRow()" style="margin-top:10px;">
+        + Add Item
+    </button>
+</div>
+
+        <!-- Footer Buttons -->
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button class="btn ghost" onclick="closeExitModal()">Cancel</button>
+            <button class="btn" onclick="saveExit()">Save Exit</button>
+        </div>
+
+    </div>
+</div>
