@@ -8,6 +8,7 @@
      - Suppliers
      - Purchase Orders
      - Entries
+     - Exits
 */
 
 function safeCall(fnName, ...args) {
@@ -43,7 +44,7 @@ function setupNavigation() {
         poBtn.addEventListener("click", () => safeCall("loadPOs"));
     }
 
-    // Entries  ← **FIXED NEW ENTRY**
+    // Entries
     const entBtn = document.getElementById("navEntries");
     if (entBtn) {
         entBtn.addEventListener("click", () => safeCall("loadEntriesPage"));
@@ -61,8 +62,11 @@ function setupNavigation() {
    ======================= */
 
 function loadDefaultScreen() {
-    // Change this if you want another default screen
-    safeCall("loadInventory");
+    // ⛔ Inventory no longer loads automatically
+    // ⛔ Do NOT call safeCall("loadInventory")
+
+    // Leave blank = landing page stays visible
+    console.log("Dashboard loaded. Awaiting user action.");
 }
 
 /* =======================
@@ -71,5 +75,5 @@ function loadDefaultScreen() {
 
 document.addEventListener("DOMContentLoaded", () => {
     setupNavigation();
-    loadDefaultScreen();
+    loadDefaultScreen();  // Blank landing page
 });

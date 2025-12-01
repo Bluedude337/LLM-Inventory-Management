@@ -5,24 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9cffe7ac-eafa-4051-bb7b-50152b404586" name="Changes" comment="26/11/2025 20:40&#10;Initial project commit">
-      <change afterPath="$PROJECT_DIR$/frontend/assets/EXITS-MODEL.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/routers/exits_print.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/services/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routers/exits.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/exits_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/exits/exits.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/core/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/routers/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/exits/exits.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/export_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/pdf_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/product_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/product_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/services/supplier_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/static/suppliers_form.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/static/suppliers_list.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/templates/suppliers_form.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/templates/suppliers_list.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/assets/EXITS-MODEL.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/assets/EXITS-MODEL.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/exits/exits.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/exits/exits.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/exits/exits.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/exits/exits.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/main.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,7 +99,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764279086239</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="26/11/2025 20:40&#10;Initial project commit">
+      <option name="closed" value="true" />
+      <created>1764596146382</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1764596146382</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
