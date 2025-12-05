@@ -1,14 +1,14 @@
+/* ============================================
+   PURCHASE ORDER CREATION MODULE — po_create.js (AUTH READY)
+   Source: :contentReference[oaicite:1]{index=1}
+============================================ */
+
 let selectedSupplierData = null;
 let selectedBuyerData = null;
 
-/* ============================================
-   PURCHASE ORDER CREATION MODULE — po_create.js
-   ============================================ */
-
 /* =======================
-   Page Loader
+   PAGE LOADER
    ======================= */
-
 function openCreatePO() {
     fetch("js/po/po_create.html")
         .then(r => r.text())
@@ -20,12 +20,10 @@ function openCreatePO() {
 }
 
 /* ============================================
-   SUPPLIER SELECTION HANDLING
-   ============================================ */
-
+   SUPPLIER SELECTION
+============================================ */
 function selectSupplier(s) {
     selectedSupplierData = s;
-
     const box = document.getElementById("selectedSupplier");
     if (!box) return;
 
@@ -41,12 +39,10 @@ function selectSupplier(s) {
 }
 
 /* ============================================
-   BUYER SELECTION HANDLING
-   ============================================ */
-
+   BUYER SELECTION
+============================================ */
 function selectBuyer(b) {
     selectedBuyerData = b;
-
     const box = document.getElementById("selectedBuyer");
     if (!box) return;
 
@@ -62,12 +58,10 @@ function selectBuyer(b) {
 }
 
 /* ============================================
-   ITEM ENTRY ROWS
-   ============================================ */
-
+   ITEM ROWS
+============================================ */
 function addPOItemRow() {
     const container = document.getElementById("poItems");
-
     const rowId = "poitem_" + Date.now();
 
     const row = document.createElement("div");
@@ -76,24 +70,21 @@ function addPOItemRow() {
 
     row.innerHTML = `
         <input placeholder="Code" class="modal-input" style="width:90px;"
+               id="${rowId}_code"
                onblur="autoFillItem('${rowId}')"
-               onkeyup="if(event.key==='Enter') autoFillItem('${rowId}')"
-               id="${rowId}_code">
+               onkeyup="if(event.key==='Enter') autoFillItem('${rowId}')">
 
-        <input placeholder="Description" class="modal-input" style="flex:1;"
-               id="${rowId}_desc" readonly>
+        <input placeholder="Description" class="modal-input" style="flex:1;" id="${rowId}_desc" readonly>
 
-        <input placeholder="Unit" class="modal-input" style="width:70px;"
-               id="${rowId}_unit" readonly>
+        <input placeholder="Unit" class="modal-input" style="width:70px;" id="${rowId}_unit" readonly>
 
-        <input placeholder="Qty" type="number" class="modal-input" style="width:70px;"
-               id="${rowId}_qty" oninput="updateItemTotal('${rowId}')">
+        <input placeholder="Qty" type="number" class="modal-input" style="width:70px;" id="${rowId}_qty"
+               oninput="updateItemTotal('${rowId}')">
 
-        <input placeholder="Price" type="number" class="modal-input" style="width:80px;"
-               id="${rowId}_price" oninput="updateItemTotal('${rowId}')">
+        <input placeholder="Price" type="number" class="modal-input" style="width:80px;" id="${rowId}_price"
+               oninput="updateItemTotal('${rowId}')">
 
-        <input placeholder="Total" class="modal-input" style="width:100px;"
-               id="${rowId}_total" readonly>
+        <input placeholder="Total" class="modal-input" style="width:100px;" id="${rowId}_total" readonly>
 
         <button class="btn ghost" onclick="removePOItem('${rowId}')">X</button>
     `;
@@ -105,27 +96,29 @@ async function autoFillItem(rowId) {
     const code = document.getElementById(`${rowId}_code`).value.trim();
     if (!code) return;
 
-    const res = await fetch(`/api/products/${code}`);
-    if (!res.ok) {
-        alert("Product not found");
-        return;
+    try {
+        const res = await apiGET(`/api/products/${code}`);
+        if (!res || !res.product) {
+            alert("Product not found");
+            return;
+        }
+
+        const p = res.product;
+
+        document.getElementById(`${rowId}_desc`).value = p.description || "";
+        document.getElementById(`${rowId}_unit`).value = p.unit || "";
+        updateItemTotal(rowId);
+
+    } catch (err) {
+        console.error(err);
+        alert("Error loading product.");
     }
-
-    const data = await res.json();
-    const p = data.product || data;
-
-    document.getElementById(`${rowId}_desc`).value = p.description || "";
-    document.getElementById(`${rowId}_unit`).value = p.unit || "";
-
-    updateItemTotal(rowId);
 }
 
 function updateItemTotal(rowId) {
     const qty = parseFloat(document.getElementById(`${rowId}_qty`).value) || 0;
     const price = parseFloat(document.getElementById(`${rowId}_price`).value) || 0;
-
     document.getElementById(`${rowId}_total`).value = (qty * price).toFixed(2);
-
     updatePOTotal();
 }
 
@@ -135,9 +128,8 @@ function removePOItem(rowId) {
 }
 
 /* ============================================
-   TOTAL SUM CALCULATION
-   ============================================ */
-
+   TOTAL CALC
+============================================ */
 function updatePOTotal() {
     let total = 0;
 
@@ -152,9 +144,8 @@ function updatePOTotal() {
 }
 
 /* ============================================
-   BUYER PICKER MODAL
-   ============================================ */
-
+   BUYER PICKER (uses suppliers list)
+============================================ */
 async function openBuyerPicker() {
     await loadSuppliersData();
 
@@ -164,24 +155,19 @@ async function openBuyerPicker() {
             justify-content:center; background:rgba(0,0,0,0.7); z-index:999;">
 
             <div class="card" style="background:#1e293b; padding:20px; width:800px; max-height:80vh; overflow:auto;">
-                <h2 style="font-weight:300;">Select Buyer</h2>
+                <h2>Select Buyer</h2>
 
                 <input id="bpSearch" placeholder="Search..." class="modal-input"
                        style="margin-bottom:12px;" oninput="bpApplyFilter()">
 
                 <table>
                     <thead>
-                        <tr>
-                            <th>CNPJ</th>
-                            <th>Name</th>
-                            <th>City</th>
-                            <th>Select</th>
-                        </tr>
+                        <tr><th>CNPJ</th><th>Name</th><th>City</th><th>Select</th></tr>
                     </thead>
                     <tbody id="bpBody"></tbody>
                 </table>
 
-                <button class="btn ghost" style="margin-top:12px;" onclick="closeBuyerPicker()">Close</button>
+                <button class="btn ghost" onclick="closeBuyerPicker()">Close</button>
             </div>
         </div>
     `;
@@ -191,21 +177,29 @@ async function openBuyerPicker() {
 }
 
 function closeBuyerPicker() {
-    const el = document.getElementById("buyerPicker");
-    if (el) el.remove();
+    document.getElementById("buyerPicker")?.remove();
+}
+
+function bpApplyFilter() {
+    const q = document.getElementById("bpSearch").value.toLowerCase();
+    const list = supData.filter(b =>
+        b.name.toLowerCase().includes(q) ||
+        b.cnpj.toLowerCase().includes(q) ||
+        (b.city || "").toLowerCase().includes(q)
+    );
+    renderBuyerPicker(list);
 }
 
 function renderBuyerPicker(list = supData) {
-    const tbody = document.getElementById("bpBody");
-    if (!tbody) return;
+    const tb = document.getElementById("bpBody");
+    if (!tb) return;
 
     if (!list.length) {
-        tbody.innerHTML = `
-            <tr><td colspan="4" style="padding:14px; text-align:center;">No buyers found.</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="4" style="text-align:center;">No buyers found</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = list.map((b, idx) => `
+    tb.innerHTML = list.map((b, idx) => `
         <tr>
             <td>${escapeHtml(b.cnpj)}</td>
             <td>${escapeHtml(b.name)}</td>
@@ -215,36 +209,19 @@ function renderBuyerPicker(list = supData) {
     `).join("");
 }
 
-function bpApplyFilter() {
-    const q = (document.getElementById("bpSearch").value || "").toLowerCase();
-
-    const filtered = supData.filter(s =>
-        (s.name || "").toLowerCase().includes(q) ||
-        (s.cnpj || "").toLowerCase().includes(q) ||
-        (s.city || "").toLowerCase().includes(q)
-    );
-
-    renderBuyerPicker(filtered);
-}
-
 function selectBuyerByIndex(idx) {
-    const b = supData[idx];
-    selectBuyer(b);
+    selectBuyer(supData[idx]);
     closeBuyerPicker();
 }
 
 /* ============================================
    SAVE PURCHASE ORDER
-   ============================================ */
-
+============================================ */
 async function savePO() {
-    // Validate supplier
     if (!selectedSupplierData) {
         alert("Select a supplier first!");
         return;
     }
-
-    // Validate buyer
     if (!selectedBuyerData) {
         alert("Select a buyer first!");
         return;
@@ -253,32 +230,22 @@ async function savePO() {
     // Build item list
     const items = [];
     document.querySelectorAll("#poItems > div").forEach(row => {
-        const rowId = row.id;
+        const id = row.id;
 
-        const code = document.getElementById(`${rowId}_code`).value.trim();
-        const desc = document.getElementById(`${rowId}_desc`).value.trim();
-        const unit = document.getElementById(`${rowId}_unit`).value.trim();
-        const qty = parseFloat(document.getElementById(`${rowId}_qty`).value) || 0;
-        const price = parseFloat(document.getElementById(`${rowId}_price`).value) || 0;
+        const code = document.getElementById(`${id}_code`).value.trim();
+        const desc = document.getElementById(`${id}_desc`).value.trim();
+        const unit = document.getElementById(`${id}_unit`).value.trim();
+        const qty = Number(document.getElementById(`${id}_qty`).value) || 0;
+        const price = Number(document.getElementById(`${id}_price`).value) || 0;
 
-        if (code) {
-            items.push({
-                code,
-                description: desc,
-                unit,
-                qty,
-                price,
-                total: qty * price
-            });
-        }
+        if (code) items.push({ code, description: desc, unit, qty, price, total: qty * price });
     });
 
-    if (items.length === 0) {
+    if (!items.length) {
         alert("Add at least one item!");
         return;
     }
 
-    // Build payload
     const payload = {
         supplier_cnpj: selectedSupplierData.cnpj,
         supplier_name: selectedSupplierData.name,
@@ -301,28 +268,30 @@ async function savePO() {
         buyer_contact: selectedBuyerData.seller + " - " + selectedBuyerData.cellphone,
 
         notes: "",
-        items: items
+        items
     };
 
-    // Send to backend
-    const res = await fetch("/api/po/create/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    });
+    try {
+        const res = await apiPOST("/api/po/create/", payload);
 
-    if (res.ok) {
+        if (!res.ok) {
+            const err = res.data || {};
+            alert("Error saving PO: " + (err.detail || "Unknown error"));
+            return;
+        }
+
         alert("PO created successfully!");
         loadPOs();
-    } else {
-        alert("Error saving PO.");
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to save PO.");
     }
 }
 
 /* ============================================
    Utils Fallback
-   ============================================ */
-
+============================================ */
 if (typeof escapeHtml !== "function") {
     function escapeHtml(s) {
         if (s == null) return "";

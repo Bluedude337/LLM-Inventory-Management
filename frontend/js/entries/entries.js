@@ -1,14 +1,13 @@
 /* ============================================
-   GLOBAL STATE (DO NOT TOUCH OUTSIDE FUNCTIONS)
-   ============================================ */
+   ENTRIES MODULE — entries.js (AUTH READY)
+============================================ */
 
-let ENTRIES_DATA = [];      // Original, untouched
-let FILTERS = {};           // Active filters
+let ENTRIES_DATA = [];
+let FILTERS = {};
 
-/* ============================================
-   LOAD PAGE
-   ============================================ */
-
+/* ===============================
+   PAGE LOADER
+=============================== */
 async function loadEntriesPage() {
     fetch("js/entries/entries.html")
         .then(r => r.text())
@@ -18,22 +17,20 @@ async function loadEntriesPage() {
         });
 }
 
-/* ============================================
-   FETCH DATA
-   ============================================ */
-
+/* ===============================
+   LOAD ENTRIES FROM BACKEND
+=============================== */
 async function loadEntries() {
     const container = document.getElementById("entriesContainer");
 
     try {
-        const res = await fetch("/api/entries/");
-        if (!res.ok) throw new Error("Failed loading entries");
+        const data = await apiGET("/api/entries/");
+        if (!data) throw new Error("No response");
 
-        const data = await res.json();
         ENTRIES_DATA = data.entries || [];
 
-        resetFilters();        // Clean start
-        renderTable();         // Draw UI
+        resetFilters();
+        renderTable();
 
     } catch (err) {
         console.error(err);
@@ -41,16 +38,12 @@ async function loadEntries() {
     }
 }
 
-/* ============================================
-   RESET FILTERS (used when clearing inputs)
-   ============================================ */
-
+/* ===============================
+   RESET FILTER STATE
+=============================== */
 function resetFilters() {
     FILTERS = {
-        text: {
-            id: "",
-            received_at: ""
-        },
+        text: { id: "", received_at: "" },
         dropdown: {
             po_number: "",
             supplier_name: "",
@@ -60,27 +53,24 @@ function resetFilters() {
     };
 }
 
-/* ============================================
-   MAIN FILTER PIPELINE (Core Engine)
-   ============================================ */
-
+/* ===============================
+   FILTER ENGINE
+=============================== */
 function applyAllFilters() {
     let result = [...ENTRIES_DATA];
 
     // TEXT FILTERS
     Object.entries(FILTERS.text).forEach(([field, value]) => {
-        if (value.trim() !== "") {
+        if (value.trim()) {
             result = result.filter(row =>
-                String(row[field] || "")
-                    .toLowerCase()
-                    .includes(value.toLowerCase())
+                String(row[field] || "").toLowerCase().includes(value.toLowerCase())
             );
         }
     });
 
     // DROPDOWNS
     Object.entries(FILTERS.dropdown).forEach(([field, value]) => {
-        if (value !== "" && value !== null) {
+        if (value) {
             result = result.filter(row => String(row[field]) === String(value));
         }
     });
@@ -88,15 +78,13 @@ function applyAllFilters() {
     return result;
 }
 
-/* ============================================
-   RENDER TABLE + HEADER FILTERS
-   ============================================ */
-
+/* ===============================
+   TABLE RENDERING
+=============================== */
 function renderTable() {
     const data = applyAllFilters();
     const container = document.getElementById("entriesContainer");
 
-    // Build dropdown options from the **filtered dataset**, not raw
     const supplierList = [...new Set(ENTRIES_DATA.map(e => e.supplier_name || e.supplier_cnpj))];
     const productList = [...new Set(ENTRIES_DATA.map(e => e.product_code))];
     const descList = [...new Set(ENTRIES_DATA.map(e => e.description))];
@@ -106,42 +94,16 @@ function renderTable() {
         <table>
             <thead>
                 <tr>
+                    <th>ID<br><input class="filter-input" data-field="id"
+                        value="${FILTERS.text.id}" oninput="onTextFilterChange(event)"></th>
 
-                    <th>
-                        ID<br>
-                        <input class="filter-input"
-                               data-field="id"
-                               value="${FILTERS.text.id}"
-                               oninput="onTextFilterChange(event)">
-                    </th>
+                    <th>Date<br><input class="filter-input" data-field="received_at"
+                        value="${FILTERS.text.received_at}" oninput="onTextFilterChange(event)"></th>
 
-                    <th>
-                        Date<br>
-                        <input class="filter-input"
-                               data-field="received_at"
-                               value="${FILTERS.text.received_at}"
-                               oninput="onTextFilterChange(event)">
-                    </th>
-
-                    <th>
-                        PO Number<br>
-                        ${buildDropdown("po_number", poList)}
-                    </th>
-
-                    <th>
-                        Supplier<br>
-                        ${buildDropdown("supplier_name", supplierList)}
-                    </th>
-
-                    <th>
-                        Product<br>
-                        ${buildDropdown("product_code", productList)}
-                    </th>
-
-                    <th>
-                        Description<br>
-                        ${buildDropdown("description", descList)}
-                    </th>
+                    <th>PO<br>${buildDropdown("po_number", poList)}</th>
+                    <th>Supplier<br>${buildDropdown("supplier_name", supplierList)}</th>
+                    <th>Product<br>${buildDropdown("product_code", productList)}</th>
+                    <th>Description<br>${buildDropdown("description", descList)}</th>
 
                     <th>Unit</th>
                     <th>Qty</th>
@@ -149,18 +111,14 @@ function renderTable() {
                     <th>Total</th>
                 </tr>
             </thead>
-
-            <tbody>
-                ${data.map(row => rowHTML(row)).join("")}
-            </tbody>
+            <tbody>${data.map(rowHTML).join("")}</tbody>
         </table>
     `;
 }
 
-/* ============================================
-   DROPDOWN BUILDER
-   ============================================ */
-
+/* ===============================
+   DROPDOWN
+=============================== */
 function buildDropdown(field, items) {
     return `
         <select class="filter-dropdown"
@@ -175,29 +133,23 @@ function buildDropdown(field, items) {
     `;
 }
 
-/* ============================================
-   TEXT FILTER HANDLER
-   ============================================ */
-
+/* ===============================
+   FILTER HANDLERS
+=============================== */
 function onTextFilterChange(e) {
     const field = e.target.dataset.field;
     FILTERS.text[field] = e.target.value;
     renderTable();
 }
 
-/* ============================================
-   DROPDOWN FILTER HANDLER
-   ============================================ */
-
 function onDropdownChange(field, value) {
     FILTERS.dropdown[field] = value;
     renderTable();
 }
 
-/* ============================================
-   TABLE ROW TEMPLATE
-   ============================================ */
-
+/* ===============================
+   ROW TEMPLATE
+=============================== */
 function rowHTML(e) {
     return `
         <tr>
@@ -215,25 +167,20 @@ function rowHTML(e) {
     `;
 }
 
-/* ============================================
-   BRAZILIAN DATE FORMAT
-   ============================================ */
-
+/* ===============================
+   DATE FORMAT
+=============================== */
 function formatDateBR(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+        day:"2-digit", month:"2-digit", year:"numeric",
+        hour:"2-digit", minute:"2-digit"
     });
 }
 
-/* ============================================
-   EXPORT TO EXCEL
-   ============================================ */
-
+/* ===============================
+   EXPORT
+=============================== */
 function exportEntriesToExcel() {
     window.open("/api/entries/export", "_blank");
 }

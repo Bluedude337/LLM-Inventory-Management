@@ -1,12 +1,14 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Depends
 from backend.core.database import get_connection
+from backend.core.security import get_current_user
 import pandas as pd
 import io
 
 router = APIRouter()
 
+
 @router.get("/")
-def list_entries():
+def list_entries(user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
 
@@ -34,12 +36,8 @@ def list_entries():
     return {"entries": [dict(r) for r in rows]}
 
 
-# ============================================
-# Excel Export
-# ============================================
-
 @router.get("/export")
-def export_entries_to_excel():
+def export_entries_to_excel(user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
 
@@ -65,11 +63,6 @@ def export_entries_to_excel():
 
     return Response(
         content=output.read(),
-        media_type=(
-            "application/"
-            "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        ),
-        headers={
-            "Content-Disposition": "attachment; filename=entries_history.xlsx"
-        }
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=entries_history.xlsx"}
     )

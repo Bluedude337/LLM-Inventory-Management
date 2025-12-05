@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Golden Dolphin - Login</title>
+
 <style>
     body {
         margin: 0;
@@ -25,17 +26,6 @@
         text-align: center;
         box-shadow: 0 0 20px rgba(0,0,0,0.3);
         border: 1px solid #334155;
-    }
-
-    .logo {
-        width: 120px;
-        margin-bottom: 20px;
-    }
-
-    h1 {
-        margin-bottom: 25px;
-        color: #f8fafc;
-        font-weight: 300;
     }
 
     input[type="text"], input[type="password"] {
@@ -69,17 +59,15 @@
         background: #0ea5e9;
     }
 
-    /* Registration modal */
+    /* Modal */
     .modal-bg {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.9);
+        inset: 0;
+        background: rgba(15,23,42,0.88);
         display: none;
         justify-content: center;
         align-items: center;
+        z-index: 200;
     }
 
     .modal {
@@ -90,26 +78,8 @@
         border: 1px solid #334155;
         text-align: center;
     }
-
     .close-btn {
         background: #ef4444;
-        margin-top: 10px;
-    }
-    .close-btn:hover {
-        background: #dc2626;
-    }
-
-    .successMsg, .errorMsg {
-        font-weight: bold;
-        margin-top: 10px;
-    }
-
-    .successMsg {
-        color: #4ade80;
-    }
-
-    .errorMsg {
-        color: #f87171;
     }
 </style>
 </head>
@@ -117,91 +87,32 @@
 <body>
 
 <div class="container">
-    <img class="logo" src="/static/logo.png" alt="Golden Dolphin Logo" />
+    <h1>Login</h1>
 
-    <h1>Welcome</h1>
+    <input type="text" id="loginUsername" placeholder="Username" />
+    <input type="password" id="loginPassword" placeholder="Password" />
 
-    <input type="text" id="loginUsername" placeholder="Enter username" />
-    <button onclick="continueLogin()">Continue</button>
+    <button onclick="performLogin()">Login</button>
 
-    <button onclick="showRegisterModal()" style="background:#64748b;">Register Account</button>
+    <div id="loginMessage"></div>
 </div>
 
-<!-- Registration Modal -->
-<div class="modal-bg" id="registerModal">
+<!-- BOOTSTRAP ADMIN CREATION MODAL -->
+<div class="modal-bg" id="bootstrapModal">
     <div class="modal">
-        <h2>Create Account</h2>
+        <h2>Setup Required</h2>
+        <p>Create the Master Admin Account</p>
 
-        <input type="text" id="regUsername" placeholder="New username" />
-        <input type="password" id="regPassword" placeholder="New password" />
+        <input id="bsUsername" type="text" placeholder="Admin username" />
+        <input id="bsPassword" type="password" placeholder="Admin password" />
 
-        <button onclick="registerUser()">Register</button>
-        <button class="close-btn" onclick="closeRegisterModal()">Close</button>
+        <button onclick="createBootstrapAdmin()">Create Admin</button>
+        <button class="close-btn" onclick="closeBootstrapModal()">Close</button>
 
-        <div id="regMessage"></div>
+        <div id="bsMessage"></div>
     </div>
 </div>
 
-<script>
-function showRegisterModal() {
-    document.getElementById("registerModal").style.display = "flex";
-}
-
-function closeRegisterModal() {
-    document.getElementById("registerModal").style.display = "none";
-    document.getElementById("regMessage").innerHTML = "";
-}
-
-function continueLogin() {
-    const username = document.getElementById("loginUsername").value;
-
-    if (!username) {
-        alert("Please enter your username.");
-        return;
-    }
-
-    // Redirect to dashboard
-    window.location = "/dashboard";
-}
-
-async function registerUser() {
-    const username = document.getElementById("regUsername").value;
-    const password = document.getElementById("regPassword").value;
-    const msgDiv = document.getElementById("regMessage");
-
-    if (!username || !password) {
-        msgDiv.innerHTML = "<p class='errorMsg'>Please fill in both fields.</p>";
-        return;
-    }
-
-    const res = await fetch("/auth/signup", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
-    });
-
-    if (res.status === 409) {
-        msgDiv.innerHTML = "<p class='errorMsg'>Username already exists.</p>";
-        return;
-    }
-
-    if (!res.ok) {
-        msgDiv.innerHTML = "<p class='errorMsg'>Failed to register.</p>";
-        return;
-    }
-
-    msgDiv.innerHTML = "<p class='successMsg'>User registered successfully!</p>";
-}
-
-
-
-
-
-</script>
-
+<script src="js/login.js"></script>
 </body>
 </html>
-
-

@@ -1,13 +1,15 @@
 /* ============================================
-   PURCHASE ORDER VIEW MODULE — po_view.js
-   ============================================ */
+   PURCHASE ORDER VIEW MODULE — po_view.js (AUTH READY)
+   Updated to:
+     - download PDF with authFetch + blob
+     - receive PO using PUT via authFetch (matches backend)
+   Source reviewed: :contentReference[oaicite:2]{index=2}
+============================================ */
 
 /* =======================
-   PO Detail Loader
+   OPEN PO VIEW PAGE
    ======================= */
-
 async function openPO(po_number) {
-    // Load placeholder template
     fetch("js/po/po_view.html")
         .then(r => r.text())
         .then(html => {
@@ -16,21 +18,22 @@ async function openPO(po_number) {
         });
 }
 
+/* =======================
+   LOAD PO DETAILS
+   ======================= */
 async function loadPOView(po_number) {
     const container = document.getElementById("poViewContainer");
 
     try {
-        const res = await fetch(`/api/po/${po_number}/`);
-        if (!res.ok) throw new Error("Failed to load PO");
+        const data = await apiGET(`/api/po/${po_number}/`);
+        if (!data || !data.header) throw new Error("Invalid PO response.");
 
-        const data = await res.json();
         const header = data.header;
         const items = data.items || [];
 
-        // Render PO view
         container.innerHTML = buildPOViewHTML(header, items);
 
-        // After rendering, update button states based on PO status
+        // Apply status-based controls (Approve / Cancel / Receive)
         applyPOStatusControls(header.status, po_number);
 
     } catch (err) {
@@ -44,20 +47,17 @@ async function loadPOView(po_number) {
 }
 
 /* =======================
-   Build HTML (Dynamic)
+   BUILD HTML
    ======================= */
-
 function buildPOViewHTML(header, items) {
     return `
         <h1 style="font-weight:300;">PO ${escapeHtml(header.po_code || header.po_number)}</h1>
 
-        <!-- Supplier + Buyer + Header Info -->
         <div class="card" style="margin-bottom:20px;">
             <div style="display:flex; justify-content:space-between; gap:30px;">
-
                 <!-- Supplier -->
                 <div style="flex:1;">
-                    <h3 style="margin:0 0 8px 0; font-weight:400;">Supplier</h3>
+                    <h3 style="margin-bottom:8px;">Supplier</h3>
                     <div><strong>${escapeHtml(header.supplier_name)}</strong></div>
                     <div>CNPJ: ${escapeHtml(header.supplier_cnpj)}</div>
                     <div>${escapeHtml(header.supplier_address)} - ${escapeHtml(header.supplier_neighborhood)}</div>
@@ -68,7 +68,7 @@ function buildPOViewHTML(header, items) {
 
                 <!-- Buyer -->
                 <div style="flex:1;">
-                    <h3 style="margin:0 0 8px 0; font-weight:400;">Buyer</h3>
+                    <h3 style="margin-bottom:8px;">Buyer</h3>
                     <div><strong>${escapeHtml(header.buyer_name)}</strong></div>
                     <div>CNPJ: ${escapeHtml(header.buyer_cnpj)}</div>
                     <div>${escapeHtml(header.buyer_address)} - ${escapeHtml(header.buyer_neighborhood)}</div>
@@ -77,10 +77,10 @@ function buildPOViewHTML(header, items) {
                     <div>Contact: ${escapeHtml(header.buyer_contact || "")}</div>
                 </div>
 
-                <!-- PO Metadata -->
+                <!-- Metadata -->
                 <div style="flex:0.6; text-align:right;">
                     <div><strong>PO:</strong> ${escapeHtml(header.po_code || header.po_number)}</div>
-                    <div><strong>Date:</strong> ${new Date(header.created_at).toLocaleString()}</div>
+                    <div><strong>Date:</strong> ${formatDateTime(header.created_at)}</div>
                     <div><strong>Status:</strong> <span id="poStatus">${escapeHtml(header.status)}</span></div>
                 </div>
 
@@ -102,38 +102,24 @@ function buildPOViewHTML(header, items) {
                 </thead>
 
                 <tbody>
-                    ${items.map(it => `
-                        <tr>
-                            <td>${escapeHtml(it.item_code)}</td>
-                            <td>${escapeHtml(it.description)}</td>
-                            <td>${escapeHtml(it.unit)}</td>
-                            <td>${escapeHtml(it.qty)}</td>
-                            <td>R$ ${Number(it.unit_price || 0).toFixed(2)}</td>
-                            <td>R$ ${Number(it.line_total || (it.qty * (it.unit_price || 0))).toFixed(2)}</td>
-                        </tr>
-                    `).join("")}
+                    ${items.map(itemRowHTML).join("")}
                 </tbody>
             </table>
 
-            <!-- Action Buttons -->
             <div style="display:flex; justify-content:space-between; margin-top:14px; align-items:center;">
-
                 <div>
-                    <button class="btn" onclick="downloadPOPdf(${header.po_number})">
-                        Download PDF
-                    </button>
-
-                    <button class="btn ghost" onclick="backToPOList()">
-                        Back
-                    </button>
+                    <button class="btn" onclick="downloadPOPdf(${header.po_number})">Download PDF</button>
+                    <button class="btn ghost" onclick="backToPOList()">Back</button>
                 </div>
 
                 <div>
-                    <button id="approveBtn" class="btn" onclick="changePOStatus(${header.po_number}, 'APPROVED')">
+                    <button id="approveBtn" class="btn"
+                        onclick="changePOStatus(${header.po_number}, 'APPROVED')">
                         Approve
                     </button>
 
-                    <button id="cancelBtn" class="btn ghost" onclick="changePOStatus(${header.po_number}, 'CANCELLED')">
+                    <button id="cancelBtn" class="btn ghost"
+                        onclick="changePOStatus(${header.po_number}, 'CANCELLED')">
                         Cancel
                     </button>
                 </div>
@@ -141,87 +127,95 @@ function buildPOViewHTML(header, items) {
             </div>
         </div>
 
-        <!-- Receive Button Area -->
         <div id="poReceiveArea" style="margin-top:20px; text-align:right;"></div>
     `;
 }
 
-
 /* =======================
-   Actions: Approve / Cancel
+   TABLE ROW TEMPLATE
    ======================= */
-
-async function changePOStatus(po_number, newStatus) {
-    if (!confirm(`Are you sure you want to mark this PO as ${newStatus}?`)) return;
-
-    const res = await fetch(`/api/po/${po_number}/status`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ status: newStatus })
-    });
-
-    if (!res.ok) {
-        const err = await res.json();
-        alert("Error: " + (err.detail || "Could not change status"));
-        return;
-    }
-
-    const data = await res.json();
-    document.getElementById("poStatus").textContent = data.new_status;
-
-    alert("Status updated successfully!");
-    loadPOView(po_number);
+function itemRowHTML(it) {
+    const total = Number(it.line_total || (it.qty * (it.unit_price || 0))).toFixed(2);
+    return `
+        <tr>
+            <td>${escapeHtml(it.item_code)}</td>
+            <td>${escapeHtml(it.description)}</td>
+            <td>${escapeHtml(it.unit)}</td>
+            <td>${it.qty}</td>
+            <td>R$ ${Number(it.unit_price || 0).toFixed(2)}</td>
+            <td>R$ ${total}</td>
+        </tr>
+    `;
 }
 
-
 /* =======================
-   NEW: Receive PO
+   STATUS UPDATE
    ======================= */
-
-async function receivePO(po_number) {
-    if (!confirm(`Confirm receiving PO #${po_number}? This will update inventory.`))
-        return;
+async function changePOStatus(po_number, newStatus) {
+    if (!confirm(`Mark this PO as ${newStatus}?`)) return;
 
     try {
-        const res = await fetch(`/api/po/${po_number}/receive`, {
-            method: "PUT"
-        });
-
+        const res = await apiPOST(`/api/po/${po_number}/status`, { status: newStatus });
         if (!res.ok) {
-            const err = await res.json();
-            alert("Error: " + (err.detail || "Could not receive PO"));
+            alert("Error: " + (res.data?.detail || "Unable to update status"));
+            return;
+        }
+
+        alert("Status updated successfully!");
+        loadPOView(po_number);
+
+    } catch (err) {
+        console.error(err);
+        alert("Unable to update PO status.");
+    }
+}
+
+/* =======================
+   RECEIVE PURCHASE ORDER
+   ======================= */
+async function receivePO(po_number) {
+    if (!confirm(`Confirm receiving PO #${po_number}? Inventory will be updated.`)) return;
+
+    try {
+        // Use authFetch with PUT to match backend route
+        const res = await authFetch(`/api/po/${po_number}/receive`, { method: "PUT" });
+
+        if (!res) {
+            alert("No response from server.");
+            return;
+        }
+
+        // Try parse JSON if possible
+        const parsed = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            alert("Error: " + (parsed?.detail || "Failed to receive PO"));
             return;
         }
 
         alert("PO received successfully!");
-        openPO(po_number);
+        loadPOView(po_number);
 
     } catch (err) {
         console.error(err);
-        alert("Failed to receive PO");
+        alert("Error receiving PO.");
     }
 }
 
-
 /* =======================
-   Status Control Logic
+   STATUS-BASED UI CONTROLS
    ======================= */
-
 function applyPOStatusControls(status, po_number) {
     const approveBtn = document.getElementById("approveBtn");
     const cancelBtn = document.getElementById("cancelBtn");
     const receiveArea = document.getElementById("poReceiveArea");
 
-    // Disable approve/cancel when not OPEN
     if (status !== "OPEN") {
         if (approveBtn) approveBtn.disabled = true;
         if (cancelBtn) cancelBtn.disabled = true;
     }
 
-    // Clear receive area
     receiveArea.innerHTML = "";
 
-    // Only show "Receive Order" button when APPROVED
     if (status === "APPROVED") {
         receiveArea.innerHTML = `
             <button class="btn" onclick="receivePO(${po_number})">
@@ -231,27 +225,61 @@ function applyPOStatusControls(status, po_number) {
     }
 }
 
-
 /* =======================
-   Navigation
+   NAVIGATION
    ======================= */
-
 function backToPOList() {
     loadPOs();
 }
 
 /* =======================
-   PDF Download
+   PDF DOWNLOAD (auth-aware)
    ======================= */
+async function downloadPOPdf(po_number) {
+    try {
+        const res = await authFetch(`/api/po/${po_number}/pdf/`);
+        if (!res) {
+            alert("No response from server.");
+            return;
+        }
 
-function downloadPOPdf(po_number) {
-    const url = `/api/po/${po_number}/pdf/`;
-    window.open(url, "_blank");
+        if (!res.ok) {
+            // Try parse error body
+            const err = await res.text().catch(() => "");
+            console.error("PDF error:", err);
+            alert("Failed to download PDF.");
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        // Open in new tab
+        const win = window.open(url, "_blank");
+        if (!win) {
+            // Fallback: download
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `po_${po_number}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+        // release object URL after a short delay
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+
+    } catch (err) {
+        console.error("downloadPOPdf error:", err);
+        alert("Failed to download PDF.");
+    }
 }
 
 /* =======================
-   Utility Fallback
+   UTILITIES
    ======================= */
+function formatDateTime(dt) {
+    return new Date(dt).toLocaleString("pt-BR");
+}
 
 if (typeof escapeHtml !== "function") {
     function escapeHtml(s) {

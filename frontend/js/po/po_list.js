@@ -1,14 +1,13 @@
 /* ============================================
-   PURCHASE ORDER LIST MODULE — po_list.js
-   ============================================ */
+   PURCHASE ORDER LIST MODULE — po_list.js (AUTH READY)
+   Source: :contentReference[oaicite:4]{index=4}
+============================================ */
 
 /* =======================
    GLOBALS
    ======================= */
 let poList = [];        // Full list from backend
 let filteredPOs = [];   // Filtered list
-
-
 
 /* =======================
    PAGE LOADER
@@ -19,7 +18,7 @@ function loadPOs() {
         .then(html => {
             document.getElementById("contentArea").innerHTML = html;
 
-            // Clear filters
+            // Clear filters if present in DOM
             const f1 = document.getElementById("fltPOCode");
             const f2 = document.getElementById("fltSupplier");
             const f3 = document.getElementById("fltDate");
@@ -34,18 +33,15 @@ function loadPOs() {
         });
 }
 
-
-
 /* =======================
    LOAD PO DATA
    ======================= */
 async function loadPOList() {
     try {
-        const res = await fetch("/api/po/");
-        if (!res.ok) throw new Error("Failed to fetch POs");
+        const data = await apiGET("/api/po/");
+        if (!data || !data.purchase_orders) throw new Error("Failed to fetch POs");
 
-        const data = await res.json();
-        poList = data.purchase_orders || [];   // backend returns "pos"
+        poList = data.purchase_orders || [];
         filteredPOs = poList.slice();
 
         renderPOList();
@@ -60,16 +56,14 @@ async function loadPOList() {
     }
 }
 
-
-
 /* =======================
    FILTERING
    ======================= */
 function applyPOFilters() {
-    const fCode = document.getElementById("fltPOCode").value.toLowerCase();
-    const fSupplier = document.getElementById("fltSupplier").value.toLowerCase();
-    const fDate = document.getElementById("fltDate").value.toLowerCase();
-    const fStatus = document.getElementById("fltStatus").value.toLowerCase();
+    const fCode = (document.getElementById("fltPOCode")?.value || "").toLowerCase();
+    const fSupplier = (document.getElementById("fltSupplier")?.value || "").toLowerCase();
+    const fDate = (document.getElementById("fltDate")?.value || "").toLowerCase();
+    const fStatus = (document.getElementById("fltStatus")?.value || "").toLowerCase();
 
     filteredPOs = poList.filter(po => {
         const matchCode = (po.po_code || "").toLowerCase().includes(fCode);
@@ -82,8 +76,6 @@ function applyPOFilters() {
 
     renderPOList();
 }
-
-
 
 /* =======================
    TABLE RENDERING
@@ -117,8 +109,6 @@ function renderPOList() {
         </tr>
     `).join("");
 }
-
-
 
 /* =======================
    UTILS

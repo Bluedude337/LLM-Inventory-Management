@@ -11,10 +11,19 @@
 
 <body>
 
+<!-- AUTH GUARD -->
+<script>
+(async () => {
+    const token = sessionStorage.getItem("access_token");
+    if (!token) {
+        window.location = "/";
+        return;
+    }
+})();
+</script>
+
 <!-- Sidebar -->
 <div class="sidebar">
-
-    <!-- LOGO + RESERVED SPACE REMOVED COMPLETELY -->
 
     <button class="nav-btn" id="navInventory">📦 Inventory</button>
     <button class="nav-btn" id="navSuppliers">🏭 Suppliers</button>
@@ -22,13 +31,16 @@
     <button class="nav-btn" id="navEntries">⬆ Entries</button>
     <button class="nav-btn" id="navExits">⬇ Exits</button>
 
-    <button class="nav-btn" onclick="window.location='/'"
-            style="margin-top:auto; background:#ef4444;">🚪 Logout</button>
+    <!-- FIXED LOGOUT -->
+    <button class="nav-btn"
+            onclick="logout()"
+            style="margin-top:auto; background:#ef4444;">
+        🚪 Logout
+    </button>
 </div>
 
 <!-- Main Content Area -->
 <div class="content" id="contentArea">
-    <!-- BLANK LANDING PAGE -->
     <h1 style="font-weight:300;">Welcome</h1>
 
     <div class="placeholder-box">
@@ -39,12 +51,10 @@
 
 <!-- ========================
      JAVASCRIPT MODULE IMPORTS
-     ======================== -->
+======================== -->
 
-<!-- Utils -->
 <script src="js/utils.js"></script>
-
-<!-- Main Router -->
+<script src="js/login.js"></script> <!-- ← Required so logout() exists -->
 <script src="js/main.js"></script>
 
 <!-- Inventory -->

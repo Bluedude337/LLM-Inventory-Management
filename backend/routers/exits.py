@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date
 
+from backend.core.security import get_current_user
 from backend.services.exits_service import (
     create_exit,
     get_all_exits,
@@ -13,7 +14,7 @@ router = APIRouter()
 
 
 # ============================================================
-# Pydantic Models
+# Pydantic Models (kept explicit for docs & validation)
 # ============================================================
 
 class ExitItemInput(BaseModel):
@@ -53,11 +54,14 @@ class ExitDetailResponse(BaseModel):
 
 
 # ============================================================
-# Routes
+# Routes (protected)
 # ============================================================
 
 @router.post("/create", response_model=ExitDetailResponse)
-def create_exit_route(payload: ExitCreate):
+def create_exit_route(payload: ExitCreate, user = Depends(get_current_user)):
+    """
+    Create a new exit request with line items.
+    """
     try:
         result = create_exit(
             destination=payload.destination,
@@ -65,12 +69,9 @@ def create_exit_route(payload: ExitCreate):
             notes=payload.notes,
             created_by=payload.created_by
         )
-
         return result
-
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
@@ -83,35 +84,26 @@ def list_exits_route(
     product_code: Optional[str] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
-    sort: str = Query("desc", regex="^(asc|desc)$")
+    sort: str = Query("desc", regex="^(asc|desc)$"),
+    user = Depends(get_current_user)
 ):
     """
     Advanced listing with filtering, sorting, and pagination.
     """
-
     try:
         all_exits = get_all_exits()
 
-        # ------------------------------------------
-        # FILTERS
-        # ------------------------------------------
+        # Filters
         filtered = all_exits
-
         if destination:
             filtered = [e for e in filtered if destination.lower() in e["destination"].lower()]
-
         if date_from:
             filtered = [e for e in filtered if e["created_at"] >= date_from.isoformat()]
-
         if date_to:
             filtered = [e for e in filtered if e["created_at"] <= date_to.isoformat()]
 
         # Sorting
-        filtered = sorted(
-            filtered,
-            key=lambda e: e["created_at"],
-            reverse=(sort == "desc")
-        )
+        filtered = sorted(filtered, key=lambda e: e["created_at"], reverse=(sort == "desc"))
 
         # Pagination
         start = (page - 1) * limit
@@ -131,17 +123,16 @@ def list_exits_route(
 
 
 @router.get("/{exit_id}", response_model=ExitDetailResponse)
-def exit_detail_route(exit_id: int):
+def exit_detail_route(exit_id: int, user = Depends(get_current_user)):
+    """
+    Get full exit header + items
+    """
     try:
         details = get_exit_details(exit_id)
-
         if not details:
             raise HTTPException(status_code=404, detail="Exit not found")
-
         return details
-
     except HTTPException:
         raise
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")

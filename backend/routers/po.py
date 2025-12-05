@@ -1,22 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from backend.core.database import get_connection
-import io
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
+from backend.core.database import get_connection
+from backend.core.security import get_current_user
+from backend.services.po_service import receive_po
+import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
-from reportlab.lib.units import mm
 from reportlab.lib import colors
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from PIL import Image
-from backend.services.po_service import receive_po
 
 router = APIRouter()
 
 
 @router.post("/create/")
-def create_po(payload: dict):
+def create_po(payload: dict, user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -94,8 +91,9 @@ def create_po(payload: dict):
     finally:
         conn.close()
 
+
 @router.get("/")
-def list_pos():
+def list_pos(user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT po_number, po_code, supplier_name, created_at, status FROM purchase_orders ORDER BY created_at DESC")
@@ -103,8 +101,9 @@ def list_pos():
     conn.close()
     return {"purchase_orders": [dict(r) for r in rows]}
 
+
 @router.get("/{po_number}/")
-def get_po(po_number: int):
+def get_po(po_number: int, user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -128,8 +127,9 @@ def get_po(po_number: int):
     conn.close()
     return {"header": dict(header) if header else None, "items": [dict(r) for r in items]}
 
+
 @router.post("/{po_number}/status")
-def update_po_status(po_number: int, payload: dict):
+def update_po_status(po_number: int, payload: dict, user = Depends(get_current_user)):
     new_status = payload.get("status")
 
     if new_status not in ("OPEN", "APPROVED", "CANCELLED"):
@@ -161,20 +161,9 @@ def update_po_status(po_number: int, payload: dict):
     return {"success": True, "new_status": new_status}
 
 
-# Add this route near other PO endpoints
 @router.get("/{po_number}/pdf/", response_class=StreamingResponse)
-@router.get("/{po_number}/pdf/", response_class=StreamingResponse)
-def download_po_pdf(po_number: int):
-    import io
-    from fastapi.responses import StreamingResponse
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.utils import ImageReader
-    from reportlab.lib import colors
-
-    # -----------------------------
+def download_po_pdf(po_number: int, user = Depends(get_current_user)):
     # Fetch PO Data
-    # -----------------------------
     conn = get_connection()
     cur = conn.cursor()
 
@@ -202,9 +191,7 @@ def download_po_pdf(po_number: int):
     items = [dict(r) for r in cur.fetchall()]
     conn.close()
 
-    # -----------------------------
     # PDF Setup
-    # -----------------------------
     buffer = io.BytesIO()
     PAGE_WIDTH, PAGE_HEIGHT = A4
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -215,9 +202,9 @@ def download_po_pdf(po_number: int):
         bg = ImageReader(template_path)
         c.drawImage(bg, 0, 0, width=PAGE_WIDTH, height=PAGE_HEIGHT)
     except:
-        pass
+        bg = None
 
-    # Format money
+    # Format money helper
     def fmt(v):
         try:
             return f"R$ {float(v):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -226,17 +213,12 @@ def download_po_pdf(po_number: int):
 
     c.setFont("Helvetica", 9)
 
-    # ============================================================
     # MANUAL COORDINATES — EDIT FREELY
-    # ============================================================
-
-    # ------ Top fields (PIX, date, buyer, seller, phone) ------
     pix_x = 65; pix_y = PAGE_HEIGHT - 162
     date_x = 190; date_y = PAGE_HEIGHT - 162
     seller_name_x = 375; seller_name_y = PAGE_HEIGHT - 162
     seller_phone_x = 455; seller_phone_y = PAGE_HEIGHT - 162
 
-    # ------ Supplier + Buyer block center positions ------
     supplier_center_x = 170
     buyer_center_x    = 420
 
@@ -245,11 +227,7 @@ def download_po_pdf(po_number: int):
 
     line_spacing = 12
 
-    # ============================================================
     # DRAW TOP FIELDS
-    # ============================================================
-
-    # Split seller contact into name + phone
     supplier_contact = header.get("supplier_contact", "")
     parts = supplier_contact.split("-")
 
@@ -261,14 +239,11 @@ def download_po_pdf(po_number: int):
     c.drawString(seller_name_x, seller_name_y, seller_name)
     c.drawString(seller_phone_x, seller_phone_y, seller_phone)
 
-    # ============================================================
     # CENTERED SUPPLIER BLOCK
-    # ============================================================
-
     y = supplier_start_y
 
-    def center(text, cx, y):
-        c.drawCentredString(cx, y, text)
+    def center(text, cx, y_pos):
+        c.drawCentredString(cx, y_pos, text)
 
     center(header.get("supplier_cnpj",""), supplier_center_x, y); y -= line_spacing
     center(header.get("supplier_name",""), supplier_center_x, y); y -= line_spacing
@@ -281,10 +256,7 @@ def download_po_pdf(po_number: int):
     ); y -= line_spacing
     center(header.get("supplier_cep",""), supplier_center_x, y); y -= line_spacing
 
-    # ============================================================
     # CENTERED BUYER BLOCK
-    # ============================================================
-
     y = buyer_start_y
 
     center(header.get("buyer_cnpj",""), buyer_center_x, y); y -= line_spacing
@@ -298,9 +270,7 @@ def download_po_pdf(po_number: int):
     ); y -= line_spacing
     center(header.get("buyer_cep",""), buyer_center_x, y); y -= line_spacing
 
-    # ============================================================
-    # PO NUMBER (centerable separately)
-    # ============================================================
+    # PO NUMBER
     po_raw = header.get("po_code") or header.get("po_number")
     po_clean = str(po_raw).replace("PO","")
 
@@ -311,9 +281,7 @@ def download_po_pdf(po_number: int):
     c.drawString(po_x, po_y, po_clean)
     c.setFont("Helvetica", 9)
 
-    # ============================================================
-    # ITEMS TABLE (unchanged)
-    # ============================================================
+    # ITEMS TABLE
     table_xs = {
         "code": 58,
         "desc": 105,
@@ -335,7 +303,8 @@ def download_po_pdf(po_number: int):
         if row_count >= max_rows_per_page:
             c.showPage()
             try:
-                c.drawImage(bg, 0, 0, width=PAGE_WIDTH, height=PAGE_HEIGHT)
+                if bg:
+                    c.drawImage(bg, 0, 0, width=PAGE_WIDTH, height=PAGE_HEIGHT)
             except:
                 pass
 
@@ -369,19 +338,13 @@ def download_po_pdf(po_number: int):
         y -= row_height
         row_count += 1
 
-    # ============================================================
     # TOTAL
-    # ============================================================
     total_x = 397.5
     total_y = 100.5
 
-    # Make TOTAL text white
     c.setFillColorRGB(1, 1, 1)
     c.setFont("Helvetica-Bold", 10)
     c.drawRightString(total_x + 120, total_y - 18, fmt(subtotal))
-
-    # Reset color if needed for next page or future text
-    # c.setFillColorRGB(0, 0, 0)
 
     c.showPage()
     c.save()
@@ -395,7 +358,7 @@ def download_po_pdf(po_number: int):
 
 
 @router.put("/{po_number}/receive")
-def receive_purchase_order(po_number: int):
+def receive_purchase_order(po_number: int, user = Depends(get_current_user)):
     """
     Change PO status from APPROVED -> RECEIVED,
     update inventory, record received tables.
@@ -409,4 +372,3 @@ def receive_purchase_order(po_number: int):
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-

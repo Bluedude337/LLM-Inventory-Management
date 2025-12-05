@@ -3,7 +3,7 @@ import io
 from typing import List
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 
 from reportlab.pdfgen import canvas
@@ -13,6 +13,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import mm
 
 from backend.services.exits_service import get_exit_details
+from backend.core.security import get_current_user
 
 router = APIRouter()
 
@@ -28,7 +29,7 @@ def _draw_page_background(c: canvas.Canvas, bg_path: str, page_w, page_h):
 
 @router.get("/{exit_id}/pdf", tags=["Exits Print"])
 @router.get("/{exit_id}/pdf/", tags=["Exits Print"])
-def print_exit_pdf(exit_id: int):
+def print_exit_pdf(exit_id: int, user = Depends(get_current_user)):
     """
     Generate Exit Request PDF using EXITS-MODEL.png in LANDSCAPE mode.
     Prints only DATE + SECTOR in header and repeats DATE + SECTOR on every row.
@@ -41,9 +42,7 @@ def print_exit_pdf(exit_id: int):
     header = details["exit"]
     items: List[dict] = details["items"] or []
 
-    # -----------------------------------
     # PREPARE PDF
-    # -----------------------------------
     buffer = io.BytesIO()
     page_w, page_h = landscape(A4)
     c = canvas.Canvas(buffer, pagesize=landscape(A4))
@@ -54,9 +53,7 @@ def print_exit_pdf(exit_id: int):
     c.setFillColor(colors.black)
     c.setFont("Helvetica", 8)
 
-    # -----------------------------------
     # FORMAT DATE (Brazilian)
-    # -----------------------------------
     raw_date = header.get("created_at", "")
     try:
         dt = datetime.fromisoformat(raw_date)
@@ -66,18 +63,13 @@ def print_exit_pdf(exit_id: int):
 
     destination = header.get("destination", "")
 
-    # -----------------------------------
-    # HEADER (VALUES ONLY)
-    # -----------------------------------
+    # HEADER COORDS
     coords = {
         "date":   (52 * mm, page_h - 26.6 * mm),
         "sector": (80 * mm, page_h - 26.6 * mm)
     }
 
-
-    # -----------------------------------
-    # TABLE SETUP (YOUR COORDS KEPT)
-    # -----------------------------------
+    # TABLE SETUP
     table_start_y = page_h - 22.2 * mm
     row_height = 4.3 * mm
     max_rows_per_page = int((table_start_y - 20 * mm) // row_height)
@@ -95,9 +87,7 @@ def print_exit_pdf(exit_id: int):
     y = table_start_y - row_height
     row_count = 0
 
-    # -----------------------------------
     # TABLE ROWS — DATE + SECTOR REPEATED
-    # -----------------------------------
     for item in items:
 
         if row_count >= max_rows_per_page:
@@ -131,9 +121,7 @@ def print_exit_pdf(exit_id: int):
         y -= row_height
         row_count += 1
 
-    # -----------------------------------
     # FINISH PDF
-    # -----------------------------------
     c.showPage()
     c.save()
     buffer.seek(0)

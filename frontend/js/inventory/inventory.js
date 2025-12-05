@@ -1,11 +1,11 @@
 /* ============================================
-   INVENTORY MODULE — inventory.js
-   ============================================ */
+   INVENTORY MODULE — inventory.js (AUTH READY)
+   Source: :contentReference[oaicite:1]{index=1}
+============================================ */
 
 /* =======================
    Page Loader
    ======================= */
-
 function loadInventory() {
     fetch("js/inventory/inventory.html")
         .then(r => r.text())
@@ -16,28 +16,39 @@ function loadInventory() {
 }
 
 /* =======================
-   Data + Filters
+   Data Storage
    ======================= */
-
 let invData = [];
 let invFiltered = [];
 let invPage = 0;
 
+/* =======================
+   Load Inventory
+   ======================= */
 async function loadInventoryData() {
     const tb = document.getElementById("invBody");
 
     try {
-        const res = await fetch("/api/products");
-        const data = await res.json();
+        const res = await apiGET("/api/products/");
+        if (!res || !res.products) throw new Error("Invalid response");
 
-        invData = data.products || [];
+        invData = res.products;
         invApplyFilters();
+
     } catch (err) {
         console.error("Inventory loading error:", err);
-        tb.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Failed to load</td></tr>";
+        tb.innerHTML = `
+            <tr>
+                <td colspan='6' style='text-align:center; padding:20px;'>
+                    Failed to load inventory.
+                </td>
+            </tr>`;
     }
 }
 
+/* =======================
+   Filters
+   ======================= */
 function invApplyFilters() {
     const q = document.getElementById("invSearch").value.toLowerCase();
 
@@ -61,15 +72,17 @@ function invApplyFilters() {
 }
 
 /* =======================
-   Table & Pagination
+   Render Table
    ======================= */
-
 function invRenderTable() {
     const tb = document.getElementById("invBody");
     const rows = invFiltered.slice(invPage * 20, invPage * 20 + 20);
 
-    if (rows.length === 0) {
-        tb.innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>No results</td></tr>";
+    if (!rows.length) {
+        tb.innerHTML = `
+            <tr>
+                <td colspan='6' style='padding:20px; text-align:center;'>No results</td>
+            </tr>`;
         return;
     }
 
@@ -85,11 +98,19 @@ function invRenderTable() {
     `).join("");
 }
 
+/* =======================
+   Sorting
+   ======================= */
 function invSort(key) {
-    invFiltered.sort((a, b) => String(a[key]).localeCompare(String(b[key])));
+    invFiltered.sort((a, b) =>
+        String(a[key]).localeCompare(String(b[key]))
+    );
     invRenderTable();
 }
 
+/* =======================
+   Pagination
+   ======================= */
 function invPrevPage() {
     invPage = Math.max(0, invPage - 1);
     invRenderTable();
@@ -103,7 +124,6 @@ function invNextPage() {
 /* =======================
    Register Item Modal
    ======================= */
-
 function openRegisterItem() {
     document.getElementById("regModal").style.display = "flex";
 }
@@ -112,6 +132,9 @@ function closeRegisterItem() {
     document.getElementById("regModal").style.display = "none";
 }
 
+/* =======================
+   Register New Item
+   ======================= */
 async function registerItem() {
     const payload = {
         code: document.getElementById("r_code").value,
@@ -125,11 +148,7 @@ async function registerItem() {
     const msg = document.getElementById("regMessage");
 
     try {
-        const res = await fetch("/api/products/register", {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify(payload)
-        });
+        const res = await apiPOST("/api/products/register", payload);
 
         if (res.ok) {
             msg.innerHTML = "<span style='color:#4ade80;'>Item registered!</span>";
@@ -144,17 +163,15 @@ async function registerItem() {
 }
 
 /* =======================
-   Print
+   Print Inventory
    ======================= */
-
 function printInventory() {
     window.print();
 }
 
 /* =======================
-   Utils (fallback)
+   Fallback Escape
    ======================= */
-
 if (typeof escapeHtml !== "function") {
     function escapeHtml(s) {
         if (s == null) return "";

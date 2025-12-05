@@ -22,8 +22,6 @@ def api_get_product(code: str, current_user = Depends(get_current_user)):
     product = get_product_by_code(code)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    # Wrap product into an object to match frontend expectations
     return {"product": product}
 
 

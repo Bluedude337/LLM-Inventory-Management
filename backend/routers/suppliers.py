@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from backend.core.database import get_connection
+from backend.core.security import get_current_user
 
 router = APIRouter()
 
@@ -7,7 +8,7 @@ router = APIRouter()
 # GET ALL SUPPLIERS
 # -----------------------------
 @router.get("/", tags=["Suppliers"])
-def get_suppliers():
+def get_suppliers(user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -38,7 +39,7 @@ def get_suppliers():
 # REGISTER SUPPLIER
 # -----------------------------
 @router.post("/register/", tags=["Suppliers"])
-def register_supplier(item: dict):
+def register_supplier(item: dict, user = Depends(get_current_user)):
     conn = get_connection()
     cur = conn.cursor()
 
@@ -70,7 +71,7 @@ def register_supplier(item: dict):
             item.get("cep", ""),
             item.get("seller", ""),
             item.get("cellphone", ""),
-            item.get("pix", "")  # <-- FIXED: 10th value
+            item.get("pix", "")
         ))
 
         conn.commit()
