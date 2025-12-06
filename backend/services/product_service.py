@@ -88,22 +88,35 @@ def update_product(code, category, subcategory, description, unit, stock):
 
 def subtract_quantity(product_code: str, quantity: float, conn: sqlite3.Connection = None):
     """
-    Subtracts stock safely.
-    If conn is provided, DO NOT start or commit a transaction.
-    If conn is None, manage the full transaction internally.
+    Safely subtracts stock for a product.
+    Works both inside an existing transaction or standalone.
+
+    RETURNS (always this structure):
+    {
+        "product_code": "...",
+        "description": "...",
+        "unit": "...",
+        "previous_stock": 20,
+        "new_stock": 15
+    }
     """
 
     own_conn = False
 
+    # ---------------------------------------------------------
+    # If no connection provided, create and manage our own
+    # ---------------------------------------------------------
     if conn is None:
         conn = get_connection()
         own_conn = True
-        conn.execute("BEGIN IMMEDIATE")   # we manage transaction only if we own connection
+        conn.execute("BEGIN IMMEDIATE")
 
     try:
         cur = conn.cursor()
 
-        # Fetch product
+        # ---------------------------------------------------------
+        # 1. Fetch current product row
+        # ---------------------------------------------------------
         cur.execute("""
             SELECT code, description, unit, stock
             FROM products
@@ -114,30 +127,44 @@ def subtract_quantity(product_code: str, quantity: float, conn: sqlite3.Connecti
         if not product:
             raise ValueError(f"Product '{product_code}' does not exist.")
 
-        if quantity > product["stock"]:
+        previous_stock = float(product["stock"])
+        qty = float(quantity)
+
+        # ---------------------------------------------------------
+        # 2. Validate stock quantity
+        # ---------------------------------------------------------
+        if qty <= 0:
+            raise ValueError("Quantity must be greater than zero.")
+
+        if qty > previous_stock:
             raise ValueError(
                 f"Insufficient stock for '{product_code}'. "
-                f"Available: {product['stock']}, Requested: {quantity}"
+                f"Available: {previous_stock}, Requested: {qty}"
             )
 
-        new_stock = product["stock"] - quantity
+        # ---------------------------------------------------------
+        # 3. Subtract stock
+        # ---------------------------------------------------------
+        new_stock = previous_stock - qty
 
-        # Update stock
         cur.execute("""
             UPDATE products
             SET stock = ?
             WHERE code = ?
         """, (new_stock, product_code))
 
-        # Commit only if we opened the transaction
         if own_conn:
             conn.commit()
 
+        # ---------------------------------------------------------
+        # 4. Return full structured object (REQUIRED for exits)
+        # ---------------------------------------------------------
         return {
-            "code": product["code"],
+            "product_code": product["code"],
             "description": product["description"],
             "unit": product["unit"],
-            "stock": new_stock
+            "previous_stock": previous_stock,
+            "new_stock": new_stock
         }
 
     except Exception as e:
@@ -148,4 +175,5 @@ def subtract_quantity(product_code: str, quantity: float, conn: sqlite3.Connecti
     finally:
         if own_conn:
             conn.close()
+
 

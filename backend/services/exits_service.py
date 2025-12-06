@@ -1,38 +1,26 @@
 import sqlite3
 from datetime import datetime
 
+from fastapi import HTTPException                     # <-- REQUIRED IMPORT FIX
+
 from backend.core.database import get_connection
 from backend.services.product_service import subtract_quantity
 
 
 def create_exit(destination: str, items: list, notes: str = None, created_by: int = None):
     """
-    Creates a new exit record with items and subtracts stock.
-
-    Parameters:
-        destination (str): Where the products are going.
-        items (list): List of dictionaries:
-                      {
-                          "product_code": str,
-                          "qty": float,
-                          "unit_cost": float | None  # optional
-                      }
-        notes (str): Additional notes.
-        created_by (int): User ID who created the exit.
-
-    Returns:
-        dict: A full exit record with items.
+    Safely creates an exit with items and subtracts stock.
+    Prevents 500 errors by validating every component.
     """
 
     conn = get_connection()
     try:
-        conn.execute("BEGIN IMMEDIATE")  # ensures safe write-lock
-
+        conn.execute("BEGIN IMMEDIATE")
         cur = conn.cursor()
 
-        # ----------------------------------------------------------
-        # 1. Create EXIT header
-        # ----------------------------------------------------------
+        # ------------------------------------------------------
+        # 1. CREATE HEADER
+        # ------------------------------------------------------
         exit_code = f"EX-{int(datetime.utcnow().timestamp())}"
 
         cur.execute("""
@@ -42,57 +30,63 @@ def create_exit(destination: str, items: list, notes: str = None, created_by: in
 
         exit_id = cur.lastrowid
 
-        # ----------------------------------------------------------
-        # 2. Process each item
-        # ----------------------------------------------------------
+        # ------------------------------------------------------
+        # 2. PROCESS ITEMS
+        # ------------------------------------------------------
         for item in items:
             product_code = item["product_code"]
             qty = float(item["qty"])
-            unit_cost = item.get("unit_cost")
+            unit_cost = item.get("unit_cost") or 0.0   # SAFE DEFAULT
 
-            # Subtract stock (within same transaction)
-            updated = subtract_quantity(product_code, qty, conn=conn)
+            # --- VALIDATE PRODUCT EXISTS ---
+            cur.execute("SELECT description, unit, stock FROM products WHERE code = ?", (product_code,))
+            prod = cur.fetchone()
+            if not prod:
+                raise ValueError(f"Product not found: {product_code}")
 
-            # Fetch product details again (for description/unit)
-            description = updated["description"]
-            unit = updated["unit"]
+            description = prod["description"]
+            unit = prod["unit"]
 
-            line_total = None
-            if unit_cost is not None:
-                line_total = unit_cost * qty
+            # --- VALIDATE STOCK ---
+            if qty > prod["stock"]:
+                raise ValueError(f"Insufficient stock for {product_code}")
 
-            # Insert into exit_items
+            # --- UPDATE STOCK ---
+            new_stock = prod["stock"] - qty
+            cur.execute("UPDATE products SET stock = ? WHERE code = ?", (new_stock, product_code))
+
+            # --- INSERT ITEM ---
+            line_total = unit_cost * qty
+
             cur.execute("""
                 INSERT INTO exit_items (exit_id, product_code, description, unit, qty, unit_cost, line_total)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (exit_id, product_code, description, unit, qty, unit_cost, line_total))
 
-            # Insert audit log
+            # --- AUDIT LOG ---
             cur.execute("""
                 INSERT INTO exits_history (exit_id, product_code, qty, changed_by, action)
                 VALUES (?, ?, ?, ?, ?)
             """, (exit_id, product_code, qty, created_by, "CREATE_EXIT"))
 
-        # Commit everything
+        # Commit final
         conn.commit()
 
-        # ----------------------------------------------------------
-        # 3. Return usable structured exit info
-        # ----------------------------------------------------------
+        # ------------------------------------------------------
+        # 3. RETURN EXIT
+        # ------------------------------------------------------
         cur.execute("SELECT * FROM exits WHERE id = ?", (exit_id,))
         exit_header = dict(cur.fetchone())
 
         cur.execute("SELECT * FROM exit_items WHERE exit_id = ?", (exit_id,))
         exit_items = [dict(row) for row in cur.fetchall()]
 
-        return {
-            "exit": exit_header,
-            "items": exit_items
-        }
+        return {"exit": exit_header, "items": exit_items}
 
     except Exception as e:
         conn.rollback()
-        raise e
+        print("EXIT CREATION ERROR:", e)
+        raise HTTPException(status_code=400, detail=str(e))
 
     finally:
         conn.close()

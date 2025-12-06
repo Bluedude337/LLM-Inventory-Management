@@ -1,126 +1,115 @@
+<!-- exits.html (fixed layout; headers & inputs aligned in one grid) -->
 <h1 style="font-weight:300;">Exits</h1>
 
-<div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
-    <button class="btn" onclick="openExitModal()">Create New Exit</button>
+<div style="margin:12px 0;">
+    <button class="btn" onclick="openExitModal(false)">Create New Exit</button>
 </div>
 
-<div id="exitsContainer" class="card" style="padding:20px;">
-
-    <table>
+<div class="card">
+    <table style="width:100%;">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Code</th>
-                <th>Date</th>
-                <th>Destination</th>
-                <th>Created By</th>
+                <th>ID<br><input class="flt" oninput="filterExits()"></th>
+                <th>Code<br><input class="flt" oninput="filterExits()"></th>
+                <th>Date<br><input class="flt" oninput="filterExits()"></th>
+                <th>Destination<br><input class="flt" oninput="filterExits()"></th>
+                <th>Created By<br><input class="flt" oninput="filterExits()"></th>
                 <th>Actions</th>
             </tr>
-
-            <!-- FILTER ROW -->
-            <tr>
-                <th><input id="fltExitID"   class="flt" placeholder="Filter..." oninput="applyExitFilters()"></th>
-                <th><input id="fltExitCode" class="flt" placeholder="Filter..." oninput="applyExitFilters()"></th>
-                <th><input id="fltExitDate" class="flt" placeholder="Filter..." oninput="applyExitFilters()"></th>
-                <th><input id="fltExitDest" class="flt" placeholder="Filter..." oninput="applyExitFilters()"></th>
-                <th><input id="fltExitUser" class="flt" placeholder="Filter..." oninput="applyExitFilters()"></th>
-                <th></th>
-            </tr>
         </thead>
-
         <tbody id="exitListBody">
-            <tr><td colspan="6" style="text-align:center; padding:12px;">Loading...</td></tr>
+            <tr><td colspan="6" style="padding:16px; text-align:center;">Loading...</td></tr>
         </tbody>
     </table>
-
 </div>
 
+<!-- EXIT MODAL -->
+<div id="exitModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+            align-items:center; justify-content:center; z-index:20;">
 
-<!-- ========================= -->
-<!-- ===== EXIT MODAL ======== -->
-<!-- ========================= -->
-<div id="exitModal" style="
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.7);
-    align-items:center;
-    justify-content:center;
-    z-index:10;
-">
-    <!-- MODAL WRAPPER (scrollable) -->
     <div class="modal-box" style="
-        width:900px;
-        max-width:95%;
-        max-height:90vh;
-        background:#1e293b;
-        padding:20px;
-        border-radius:10px;
-        overflow-y:auto;
-    ">
+            width:850px;
+            max-width:95%;
+            box-sizing:border-box;
+            padding:20px;
+            border-radius:8px;
+            background: #1f2a35;
+            color: #e6eef7;
+        ">
 
-        <!-- HEADER -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h2 style="margin:0; font-weight:300;">Exit Details</h2>
-            <button class="btn ghost" onclick="closeExitModal()">Close</button>
-        </div>
+        <h2 style="font-weight:300; margin-top:0;">Exit Details</h2>
 
-        <!-- TOP FIELDS -->
-        <div style="display:grid; grid-template-columns:1fr 200px; gap:12px; margin-bottom:12px;">
-            <input id="exitDestination" class="modal-input" placeholder="Destination (required)">
-            <input id="exitCreatedBy" class="modal-input" placeholder="User ID (optional)">
-        </div>
+        <input id="exitDestination" class="modal-input" placeholder="Destination"
+               style="margin-bottom:10px; box-sizing:border-box; width:100%; padding:10px; border-radius:6px; background:#0f1724; border:1px solid #334155; color:#e6eef7;">
+        <textarea id="exitNotes" class="modal-input" placeholder="Notes (optional)"
+                  style="height:75px; box-sizing:border-box; width:100%; padding:10px; border-radius:6px; background:#0f1724; border:1px solid #334155; color:#e6eef7;"></textarea>
 
-        <textarea id="exitNotes" class="modal-input"
-                  placeholder="Notes (optional)"
-                  style="width:100%; height:80px; margin-bottom:12px;"></textarea>
+        <!-- ADD ITEM SECTION -->
+        <div id="addItemSection" style="margin-top:18px;">
+            <h3 style="margin-top:0; margin-bottom:12px;">Add Item</h3>
 
-        <!-- ITEMS CARD -->
-        <div class="card" style="margin-bottom:15px; padding:15px;">
-
-            <h3 style="margin-top:0; font-weight:300;">Items</h3>
-
-            <!-- Table header inside card -->
+            <!-- Unified 5-column grid block (header + inputs aligned) -->
             <div style="
-                display:flex;
-                gap:10px;
-                margin-bottom:8px;
-                font-weight:600;
-                color:#cbd5e1;
-                padding:5px 0;
-                border-bottom:1px solid #334155;
-                text-align:center;
+                display:grid;
+                grid-template-columns: 1fr 120px 90px 90px 80px;
+                gap:12px;
+                align-items:center;
+                margin-bottom:10px;
             ">
-                <div style="width:90px; display:flex; justify-content:center;">Code</div>
-                <div style="flex:1;  display:flex; justify-content:center;">Description</div>
-                <div style="width:70px; display:flex; justify-content:center;">Unit</div>
-                <div style="width:70px; display:flex; justify-content:center;">Stock</div>
-                <div style="width:70px; display:flex; justify-content:center;">Qty</div>
-                <div style="width:60px; display:flex; justify-content:center;"></div>
+                <!-- Header row -->
+                <div style="text-align:center; font-weight:600; color:#e6eef7;">Description</div>
+                <div style="text-align:center; font-weight:600; color:#e6eef7;">Code</div>
+                <div style="text-align:center; font-weight:600; color:#e6eef7;">Stock</div>
+                <div style="text-align:center; font-weight:600; color:#e6eef7;">Qty</div>
+                <div></div>
+
+                <!-- Input row (same grid columns) -->
+                <select id="exitProductSelect" class="modal-input"
+                        style="width:100%; box-sizing:border-box; padding:10px; border-radius:6px; background:#0f1724; border:1px solid #334155; color:#e6eef7;">
+                    <option value="">Select product...</option>
+                </select>
+
+                <input id="exitCode" class="modal-input" placeholder="Code" disabled
+                       style="box-sizing:border-box; padding:10px; border-radius:6px; background:#0f1724; border:1px solid #334155; color:#e6eef7;">
+
+                <input id="exitStock" class="modal-input" placeholder="Stock" disabled
+                       style="box-sizing:border-box; padding:10px; border-radius:6px; background:#0f1724; border:1px solid #334155; color:#e6eef7;">
+
+                <input id="exitQty" class="modal-input" placeholder="Qty"
+                       style="box-sizing:border-box; padding:10px; border-radius:6px; background:#0f1724; border:1px solid #334155; color:#e6eef7;">
+
+                <button class="btn" onclick="addExitItem()" style="
+                        width:100%;
+                        padding:10px 12px;
+                        border-radius:8px;
+                        background:#06b6d4;
+                        color:#082032;
+                        border: none;
+                        cursor:pointer;
+                    ">
+                    Add
+                </button>
             </div>
-
-            <!-- SCROLLABLE ITEMS LIST -->
-            <div id="exitItemsContainer" style="
-                max-height:40vh;
-                overflow-y:auto;
-                padding-right:8px;
-            "></div>
-
-            <button class="btn" onclick="addExitItemRow()" style="margin-top:10px;">
-                + Add Item
-            </button>
         </div>
 
-        <!-- FOOTER (sticky) -->
-        <div id="exitModalFooter" style="
-            display:flex;
-            justify-content:flex-end;
-            gap:10px;
-            position:sticky;
-            bottom:0;
-            background:#1e293b;
-            padding-top:10px;
-        "></div>
+        <h3 style="margin-top:6px;">Items Added</h3>
 
+        <!-- Items added area uses same grid columns for alignment -->
+        <div id="exitItemsContainer" style="margin-bottom:20px;">
+            <!-- content injected by JS; rows will use the same grid for perfect alignment -->
+        </div>
+
+        <div id="exitModalFooter" style="display:flex; gap:10px;">
+            <!-- footer buttons injected by JS with renderModalFooter -->
+        </div>
     </div>
 </div>
+
+<!-- Notes:
+     - This file replaces the previous version and fixes the grid alignment.
+     - The JS render functions must render item rows using the same grid-template-columns:
+       grid-template-columns: 1fr 120px 90px 90px;
+     - The modal uses inline styles so visual alignment is correct immediately.
+-->
+
