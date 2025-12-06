@@ -232,3 +232,212 @@ app.include_router(<feature>_router)
 5. Add DB table or extend existing ones
 🧬 6. INTERNAL DEPENDENCY GRAPH (SIMPLIFIED)
 frontend/js/* → backend/routers/* → backend/services/* → core/database → inventory.db
+
+# LLM Inventory Management — System Architecture (Updated)
+
+This document describes the complete architecture of the LLM Inventory Management System, including updated security, JWT authentication, modular routing, and the redesigned EXIT module.
+
+---
+
+# 📁 1. PROJECT STRUCTURE (TOP LEVEL)
+
+LLM Inventory Management/
+│
+├── backend/
+│   ├── core/
+│   │   └── database.py
+│   ├── data/
+│   │   └── inventory.db
+│   ├── routers/
+│   │   ├── auth.py
+│   │   ├── entries.py
+│   │   ├── exits.py
+│   │   ├── exits_print.py
+│   │   ├── pages.py
+│   │   ├── po.py
+│   │   ├── products.py
+│   │   └── suppliers.py
+│   ├── services/
+│   │   ├── auth_service.py
+│   │   ├── exits_service.py
+│   │   ├── po_service.py
+│   │   └── product_service.py
+│   ├── static/
+│   │   ├── PURCHASE_ORDER_template/
+│   │   ├── landing.html
+│   │   ├── logo.png
+│   │   └── suppliers.css
+│   ├── check_users.py
+│   ├── security.py     ← ADDED (JWT Helpers, Token Validation)
+│   ├── jwt_service.py  ← ADDED (Token Encoding/Decoding)
+│   └── main.py
+│
+├── frontend/
+│   ├── assets/
+│   │   ├── EXITS-MODEL.png
+│   │   ├── logo.png
+│   │   └── po_template.png
+│   ├── css/
+│   │   └── main.css
+│   ├── js/
+│   │   ├── utils.js        ← UPDATED (authFetch wrapper)
+│   │   ├── main.js         ← UPDATED (token storage, auth gating)
+│   │   ├── entries/
+│   │   │   ├── entries.html
+│   │   │   └── entries.js
+│   │   ├── exits/
+│   │   │   ├── exits.html   ← COMPLETELY REDESIGNED
+│   │   │   └── exits.js     ← COMPLETELY REWRITTEN
+│   │   ├── inventory/
+│   │   │   ├── inventory.html
+│   │   │   └── inventory.js
+│   │   ├── po/
+│   │   │   ├── po_create.html
+│   │   │   ├── po_create.js
+│   │   │   ├── po_list.html
+│   │   │   ├── po_list.js
+│   │   │   ├── po_view.html
+│   │   │   └── po_view.js
+│   │   ├── suppliers/
+│   │   │   ├── suppliers.html
+│   │   │   └── suppliers.js
+│   │   └── dashboard.html
+│
+├── requirements.txt
+└── ARCHITECTURE.md (this file)
+
+---
+
+# 🔐 2. SECURITY SYSTEM (UPDATED)
+
+The system now uses a **production-grade JWT authentication flow**, including:
+
+### ✅ Login → JWT issued  
+### ✅ Token stored in `localStorage`  
+### ✅ Authenticated routes require token  
+### ✅ Backend validates token on every request  
+### ✅ `get_current_user()` dependency added to protected routers  
+### ✅ Expired or invalid tokens block requests  
+### ✅ Master Admin bootstrap logic  
+### ✅ Client-side wrapper `authFetch()` ensures Auth header
+
+### Files involved:
+
+**Backend**
+- `routers/auth.py` — login, register, token validation routes  
+- `services/auth_service.py` — verifies passwords, issues tokens  
+- `security.py` — JWT validation, extract user from token  
+- `jwt_service.py` — encode/decode tokens  
+- `main.py` — authentication dependency setup  
+
+**Frontend**
+- `main.js` — login, logout, token storage, page loading  
+- `utils.js` — `authFetch()` ensures all fetch calls include JWT  
+
+### Protected routes
+All these require token authentication:
+
+- `/api/products`
+- `/api/suppliers`
+- `/api/entries`
+- `/api/exits`
+- `/api/po/*`
+
+---
+
+# 📦 3. EXIT MODULE — REDESIGN (FINAL VERSION)
+
+The EXIT module has been fully rebuilt:
+
+### ✔ Clean UI (5-column grid)
+### ✔ Description dropdown
+### ✔ Auto-fill Code & Stock
+### ✔ Centered aligned headers
+### ✔ Editable “Create Exit” mode
+### ✔ Locked “View Exit” mode (read-only)
+### ✔ Items rendered using the same grid
+### ✔ No overlapping or shifting elements
+### ✔ Full validation on backend
+
+### Updated files:
+
+**Frontend**
+- `frontend/js/exits/exits.html` — rewritten with consistent grid layout  
+- `frontend/js/exits/exits.js` — rewritten logic (add, view, render, grid system)
+
+**Backend**
+- `routers/exits.py` — validated user via JWT, cleaned endpoint  
+- `services/exits_service.py` — cleaned insert logic, error handling  
+
+---
+
+# 📚 4. FEATURE-LEVEL RELATION TABLE (UPDATED)
+
+### 🔐 AUTHENTICATION
+Layer | File  
+-----|------
+Frontend | `frontend/js/main.js`, `utils.js`  
+Router | `backend/routers/auth.py`  
+Service | `backend/services/auth_service.py`  
+Security | `backend/security.py`, `backend/jwt_service.py`  
+Database | `inventory.db`  
+
+### ➖ EXITS
+Layer | File  
+------|------
+Frontend | `frontend/js/exits/exits.html`, `exits.js`  
+Router | `backend/routers/exits.py`  
+Service | `backend/services/exits_service.py`  
+Printing | `backend/routers/exits_print.py`  
+Database | `exits`, `exits_items` tables  
+
+---
+
+# 🧠 5. SYSTEM CONVENTIONS
+
+1. Every feature = HTML + JS + Router + Service  
+2. Routers NEVER contain SQL  
+3. Services NEVER return HTML  
+4. Frontend NEVER accesses DB directly  
+5. Naming conventions:
+   - Routers → plural names  
+   - Services → `<feature>_service.py`  
+   - JS/HTML → `<feature>.js` & `<feature>.html`  
+
+---
+
+# 🔄 6. DATA FLOW (UPDATED)
+
+```
+Frontend JS  
+    → authFetch()  
+        → Backend Router (JWT required)  
+            → Service  
+                → Database  
+    ← Response  
+```
+
+---
+
+# 🎯 7. WHAT WAS ACCOMPLISHED IN THIS UPGRADE
+
+### ✔ Complete token-based authentication  
+### ✔ Backend route protection  
+### ✔ Frontend fetch integration  
+### ✔ Exit page rebuilt with professional layout  
+### ✔ Stable add/view item flows  
+### ✔ Architecture fully updated  
+
+---
+
+# 🚀 NEXT PHASE OPTIONS
+
+- Add User Roles / Permissions  
+- Add Audit Log System  
+- Create Dashboard Analytics  
+- Improve UI/UX globally  
+- Deploy to production (Nginx + Docker + HTTPS)  
+
+---
+
+# END OF ARCHITECTURE.md
